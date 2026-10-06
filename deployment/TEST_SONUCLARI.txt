@@ -1,0 +1,2 @@
+V15: collector JSON settings 5 unit tests PASS; Python compile PASS; TypeScript/build PASS; 10 frontend tests PASS; Chromium root collector.json download with correct API URL/token and commands OFF, previous roles/navigation/measurement/command flow PASS.
+No actual server/domain/TLS, systemd installation or physical master/PLC validation performed.

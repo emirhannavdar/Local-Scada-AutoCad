@@ -4,7 +4,7 @@ import re
 from fastapi import APIRouter,Request,HTTPException
 from pydantic import BaseModel,Field
 from api.auth import account_cursor
-from api.authorization import require_site
+from api.authorization import require_site,has_permission
 
 router=APIRouter()
 class Workspace(BaseModel):
@@ -77,3 +77,13 @@ def put(site_id:int,body:Workspace,request:Request):
   if (old[0] if old else 0)!=body.revision:raise HTTPException(409,'Şema başka kullanıcı tarafından değişti. Yenileyip son sürümü al.')
   c.execute('INSERT INTO scada_workspace(site_id,layout,revision) VALUES(%s,%s::jsonb,1) ON CONFLICT(site_id) DO UPDATE SET layout=EXCLUDED.layout,revision=scada_workspace.revision+1,updated_at=now() RETURNING revision',(site_id,json.dumps(body.layout)));revision=c.fetchone()[0]
  return {'success':True,'data':{'revision':revision}}
+
+@router.get('/{site_id}/export')
+def export(site_id:int,request:Request):
+ if not has_permission(request.state.identity,'diagram_export'):raise HTTPException(403,'Şema dışa aktarım yetkin yok.')
+ return get(site_id,request)
+
+@router.post('/{site_id}/import')
+def import_layout(site_id:int,body:Workspace,request:Request):
+ if not has_permission(request.state.identity,'diagram_import'):raise HTTPException(403,'Şema içe aktarım yetkin yok.')
+ return put(site_id,body,request)

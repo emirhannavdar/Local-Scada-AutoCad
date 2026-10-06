@@ -1,0 +1,14 @@
+[Unit]
+Description=ScadaWatt Collector
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=scada-collector
+WorkingDirectory=/opt/scada-master
+Environment=SCADA_COLLECTOR_CONFIG=/opt/scada-master/collector/collector.json
+UMask=0077
+ExecStart=/opt/scada-master/.venv/bin/python -m collector.collector
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target

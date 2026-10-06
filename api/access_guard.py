@@ -21,7 +21,7 @@ def permitted(role, method, path):
         return True
     if role != 'collector':
         return False
-    return method == 'GET' or method == 'POST' and (path == '/api/v1/control/claim' or path.startswith('/api/v1/control/commands/') and path.endswith('/result')) or method == 'POST' and path.rstrip('/') in (
+    return method == 'GET' or method == 'POST' and (path in ('/api/v1/control/claim','/api/v1/control/gpio-state') or path.startswith('/api/v1/control/commands/') and path.endswith('/result')) or method == 'POST' and path.rstrip('/') in (
         '/api/v1/measurement', '/api/v1/measurement/batch')
 
 def install_access_guard(app):
@@ -59,7 +59,8 @@ def install_access_guard(app):
             return await call_next(request)
         # Schema contains endpoint definitions only. Swagger can load it and
         # use Authorize; every actual API operation remains guarded below.
-        if not path.startswith('/api/'):
+        documentation=path in ('/docs','/redoc','/openapi.json') or path.startswith('/docs/')
+        if not path.startswith('/api/') and not documentation:
             return await call_next(request)
         from api.authorization import identity,scope,check_request,filter_result
         from fastapi import HTTPException
@@ -76,6 +77,9 @@ def install_access_guard(app):
                 await run_in_threadpool(db.execute,f'SELECT {lock}(891232)')
             user=await run_in_threadpool(identity,request.headers.get('authorization',''),admin,collector)
             if user is None:raise HTTPException(401,'API oturumu gerekli veya süresi dolmuş. Giriş yap.')
+            if documentation:
+                if user['role']!='root':raise HTTPException(403,'API dokümantasyonu root yetkisi gerektirir.')
+                return await call_next(request)
             allowed=await run_in_threadpool(scope,user)
             body={}
             if request.method not in ('GET','DELETE'):
@@ -88,7 +92,7 @@ def install_access_guard(app):
             if allowed is not None and request.method=='GET' and response.status_code<400 and 'application/json' in response.headers.get('content-type',''):
                 import json
                 raw=b''.join([chunk async for chunk in response.body_iterator])
-                value=filter_result(allowed,path,json.loads(raw))
+                value=filter_result(allowed,path,json.loads(raw),user)
                 headers={k:v for k,v in response.headers.items() if k not in ('content-length','content-type')}
                 headers['Cache-Control']='no-store'
                 return JSONResponse(value,status_code=response.status_code,headers=headers)

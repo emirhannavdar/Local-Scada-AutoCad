@@ -36,9 +36,9 @@ class Credentials(BaseModel):
 def encode(value):
     return base64.urlsafe_b64encode(value).decode().rstrip('=')
 
-def issue_token(username, key, now=None, role="root", version=1):
+def issue_token(username, key, now=None, role="root", version=1, user_id=None):
     now = int(time.time() if now is None else now)
-    payload = encode(json.dumps({'sub': username, 'role': role, 'ver': version, 'iat': now,
+    payload = encode(json.dumps({'sub': username, 'uid': user_id, 'role': role, 'ver': version, 'iat': now,
                                 'exp': now + 28800, 'aud': 'scadawatt-api'}, separators=(',', ':')).encode())
     header = encode(b'{"alg":"HS256","typ":"JWT"}')
     unsigned = header + '.' + payload
@@ -111,9 +111,10 @@ def bootstrap(body: Credentials, request: Request, response: Response):
                        (body.username, salt.hex(), hashed))
         if not cursor.fetchone():
             raise HTTPException(409, 'Yönetici hesabı zaten var. Giriş yap seçeneğini kullan.')
-        cursor.execute("INSERT INTO scada_user(username,salt,password_hash,role) VALUES(%s,%s,%s,'root')",(body.username,salt.hex(),hashed))
+        cursor.execute("INSERT INTO scada_user(username,salt,password_hash,role) VALUES(%s,%s,%s,'root') RETURNING id",(body.username,salt.hex(),hashed))
+        user_id=cursor.fetchone()[0]
     response.headers['Cache-Control'] = 'no-store'
-    return {'success': True, 'data': {'username': body.username, 'access_token': issue_token(body.username, os.environ['SCADA_ADMIN_TOKEN'].strip()), 'token_type': 'bearer', 'expires_in': 28800}}
+    return {'success': True, 'data': {'username': body.username, 'access_token': issue_token(body.username, os.environ['SCADA_ADMIN_TOKEN'].strip(),user_id=user_id), 'token_type': 'bearer', 'expires_in': 28800}}
 
 @router.get('/collector-connection')
 def collector_connection(request: Request, response: Response):
@@ -138,7 +139,7 @@ def token(body: Credentials, request: Request, response: Response):
             raise HTTPException(429, 'Çok fazla giriş denemesi. Bir dakika sonra tekrar dene.')
         _attempts[client] = (first, count + 1)
     with account_cursor() as cursor:
-        cursor.execute('SELECT username,salt,password_hash,role,auth_version FROM scada_user WHERE username=%s AND active',(body.username,))
+        cursor.execute('SELECT username,salt,password_hash,role,auth_version,id FROM scada_user WHERE username=%s AND active',(body.username,))
         row = cursor.fetchone()
     # Do the same expensive hash even if no account exists.
     hashed = password_hash(body.password, bytes.fromhex(row[1]) if row else bytes(32))
@@ -147,10 +148,10 @@ def token(body: Credentials, request: Request, response: Response):
     with _lock:
         _attempts.pop(client, None)
     response.headers['Cache-Control'] = 'no-store'
-    return {'success': True, 'data': {'access_token': issue_token(row[0], key, role=row[3], version=row[4]), 'token_type': 'bearer', 'expires_in': 28800}}
+    return {'success': True, 'data': {'access_token': issue_token(row[0], key, role=row[3], version=row[4],user_id=row[5]), 'token_type': 'bearer', 'expires_in': 28800}}
 
 @router.get('/me')
 def me(request:Request,response:Response):
     response.headers['Cache-Control']='no-store'
     identity=request.state.identity
-    return {'success':True,'data':{k:v for k,v in identity.items() if k in ('id','username','role','site_ids')}}
+    return {'success':True,'data':{k:v for k,v in identity.items() if k in ('id','username','role','site_ids','permissions')}}

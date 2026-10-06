@@ -1,0 +1,16 @@
+[Unit]
+Description=ScadaWatt API
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=scadawatt
+Group=scadawatt
+WorkingDirectory=/opt/scadawatt
+EnvironmentFile=/etc/scadawatt/api.env
+StateDirectory=scadawatt
+UMask=0077
+ExecStart=/opt/scadawatt/.venv/bin/python -m uvicorn api.api:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target

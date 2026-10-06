@@ -34,21 +34,40 @@ def execute(q,device,serial_lines=None,client_factory=create_client):
  except Exception as e:return {'status':'UNKNOWN' if attempted else 'FAILED','detail':str(e)[:1000]}
  finally:client.close()
 
+async def gpio_execute(gpio,q,device):
+ task=asyncio.create_task(asyncio.to_thread(gpio.execute,q,device))
+ try:return await asyncio.shield(task)
+ except asyncio.CancelledError:
+  await task
+  raise
+
 async def command_loop():
  if os.getenv('SCADA_COMMAND_WORKER')!='1':return
- # Empty SCADA_DEVICE_IDS uses the current API device list; explicit IDs still isolate masters.
- worker=os.getenv('SCADA_WORKER_ID',socket.gethostname());pending=None
- while True:
-  try:
-   if pending:
-    await asyncio.to_thread(post_data,f"control/commands/{pending[0]}/result",pending[1]);pending=None
-   devices=assigned_devices(await asyncio.to_thread(get_devices))
-   if devices:
-    q=await asyncio.to_thread(post_data,'control/claim',{'worker':worker,'device_ids':[d['id'] for d in devices]})
-    if q:
-     dev=next((d for d in devices if d['id']==q['config']['device_id']),None)
-     lines=await asyncio.to_thread(get_serial_lines) if dev and dev['protokol']=='MODBUS_RTU' else []
-     result=await asyncio.to_thread(execute,q,dev,lines) if dev else {'status':'FAILED','detail':'Atanmış cihaz bulunamadı.'}
-     pending=(str(q['id']),{'worker':worker,**result})
-  except Exception as e:print(f'COMMAND_API_ERROR | {e}')
-  await asyncio.sleep(1)
+ from collector.gpio_output import configured_outputs
+ worker=os.getenv('SCADA_WORKER_ID',socket.gethostname());pending=None;gpio=None;gpio_error=None
+ try:
+  try:gpio=configured_outputs(worker)
+  except Exception as e:
+   gpio_error=str(e);print(f'GPIO_CONFIG_ERROR | {gpio_error}')
+  while True:
+   try:
+    if pending:
+     await asyncio.to_thread(post_data,f"control/commands/{pending[0]}/result",pending[1]);pending=None
+    devices=assigned_devices(await asyncio.to_thread(get_devices))
+    if gpio:
+     await asyncio.to_thread(post_data,'control/gpio-state',{'worker':worker,'device_ids':[d['id'] for d in devices], 'outputs':gpio.snapshot()})
+    if devices:
+     q=await asyncio.to_thread(post_data,'control/claim',{'worker':worker,'device_ids':[d['id'] for d in devices]})
+     if q:
+      dev=next((d for d in devices if d['id']==q['config']['device_id']),None)
+      if q['config'].get('kind')=='GPIO':
+       result=await gpio_execute(gpio,q,dev) if gpio else {'status':'FAILED','detail':gpio_error or 'GPIO bu master üzerinde etkin değil.'}
+      else:
+       lines=await asyncio.to_thread(get_serial_lines) if dev and dev['protokol']=='MODBUS_RTU' else []
+       result=await asyncio.to_thread(execute,q,dev,lines) if dev else {'status':'FAILED','detail':'Atanmış cihaz bulunamadı.'}
+      print(f"COMMAND | {q['id']} | {result['status']} | {result['detail']}")
+      pending=(str(q['id']),{'worker':worker,**result})
+   except Exception as e:print(f'COMMAND_API_ERROR | {e}')
+   await asyncio.sleep(1)
+ finally:
+  if gpio:gpio.close()

@@ -62,7 +62,7 @@ export function createSetupPlan(ctx,deviceId) {
       if(ownTags.length)throw new Error(`${name(signal)} için pasif tag var. Mevcut tag’i aktif yap; ikinci kopya oluşturulmaz.`);
       const template=config.tags.find(t=>eq(t.profil_register_id,p.id)&&active(t))||{};
       const tagName=`device_${device.id}_pr${p.id}_${name(signal)}`;
-      add('tags',`${name(signal)} tag`,{...template,cihaz_id:device.id,device_id:device.id,register_id:registerId,profil_register_id:p.id,sinyal_sozlugu_id:p.sinyal_sozlugu_id,sinyal_adi:name(signal),tag_adi:tagName,name:tagName,ad:tagName,birim:signal.birim??existing?.birim??template.birim??'',olcek:1,okuma_sinifi:signal.okuma_sinifi??template.okuma_sinifi,arsiv_kurali:signal.arsiv_kurali??template.arsiv_kurali,alarm_sinifi:signal.alarm_sinifi??template.alarm_sinifi,deadband:signal.deadband??template.deadband,aktif:true});
+      add('tags',`${name(signal)} tag`,{...template,cihaz_id:device.id,device_id:device.id,register_id:registerId,profil_register_id:p.id,sinyal_sozlugu_id:p.sinyal_sozlugu_id,sinyal_adi:name(signal),tip:p.veri_tipi,tag_adi:tagName,name:tagName,ad:tagName,birim:signal.birim??existing?.birim??template.birim??'',olcek:1,okuma_sinifi:signal.okuma_sinifi??template.okuma_sinifi,arsiv_kurali:signal.arsiv_kurali??template.arsiv_kurali,alarm_sinifi:signal.alarm_sinifi??template.alarm_sinifi,deadband:signal.deadband??template.deadband,aktif:true});
     }
   }
   return {device,entries,doc,models,fingerprint:setupFingerprint(config)};

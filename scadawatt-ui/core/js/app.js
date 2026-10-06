@@ -1,3 +1,4 @@
+if(window.parent!==window)document.body.classList.add('embedded-settings-page');
 import {buildTopology,normalizeMeasurements,measurementRows,statesForTopology,nameOf,TYPES,STATUS,escapeHtml as esc,sampleState,powerSample,parseTimestamp} from './model.js';
 import {ScadaApi} from './api.js';
 import {demoData} from './demo.js';
@@ -12,7 +13,7 @@ import {ScalingPanel} from './scaling.js';
 import {SiteWizard} from './site-wizard.js';
 import {WorkspaceEditor} from './editor.js';
 const $=id=>document.getElementById(id);
-const defaults={baseUrl:'http://127.0.0.1:8000/api/v1',pollSeconds:1,staleSeconds:15,flowThreshold:.1};
+const defaults={baseUrl:(['localhost','127.0.0.1','::1'].includes(location.hostname)?'http://127.0.0.1:8000/api/v1':location.origin+'/api/v1'),pollSeconds:1,staleSeconds:15,flowThreshold:.1};
 function readStored(key,fallback){try{return JSON.parse(localStorage.getItem(key))||fallback;}catch{return fallback;}}
 let currentUser=null;
 let settings={...defaults,...readStored('scadawatt.settings.v1',{}),token:''};
@@ -164,9 +165,11 @@ function loadConfig(currentEpoch){
   const currentApi=api;
   const task=(async()=>{
     try{currentUser=await currentApi.request('auth/me');}catch{currentUser=null;config=emptyConfig();measurements=[];refreshModel();render();return;}
-    const entries=Object.entries(labels),results=await Promise.allSettled(entries.map(async([field,path])=>({field,data:await currentApi.list(path)})));
+    document.body.classList.toggle('restricted-session',currentUser?.role!=='root');
+    const entries=Object.entries(labels).filter(([field])=>currentUser?.role==='root'||['sites','dm','tm','trafo','adp','devices','tags'].includes(field)),results=await Promise.allSettled(entries.map(async([field,path])=>({field,data:await currentApi.list(path)})));
     if(currentEpoch!==epoch)return;
     const errors=[];results.forEach((r,i)=>{const [field,path]=entries[i];loaded[field]=r.status==='fulfilled';if(r.status==='fulfilled')config[field]=r.value.data;else errors.push(`/${path}: ${r.reason.message}${['dm','tm','trafo','adp'].includes(field)?' Bu dalın gerçek ilişkisi çizilemeyebilir.':''}`);});
+    if(currentUser?.role!=='root')for(const key of ['profiles','profileRegisters','signals','groups','registers','serialLines'])config[key]=[];
     configErrors=errors;measurements=normalizeMeasurements(measurements,config);refreshModel();render();
   })().finally(()=>{if(currentEpoch===epoch){loadingConfig=false;if(configLoadTask===task)configLoadTask=null;}});
   configLoadTask=task;return task;
@@ -181,8 +184,8 @@ function clearTimers(){clearInterval(pollTimer);clearInterval(configTimer);api?.
 function connect(){
   epoch++;const currentEpoch=epoch;clearTimers();demo=false;apiOnline=false;lastError='';configErrors=[];histories.clear();measurements=[];config=emptyConfig();loaded={};schema=null;api=null;dbOptions={};refreshModel();
   try{api=new ScadaApi(settings,row=>{if(currentEpoch===epoch)logRequest(row);});}catch(error){lastError=error.message;render();return;}
-  schemaReady=api.schema().then(doc=>{if(currentEpoch===epoch)schema=doc;}).catch(error=>{if(currentEpoch===epoch){schema=null;toast('API şeması okunamadı: '+error.message);}});
-  api.request('ui/options').then(options=>{if(currentEpoch===epoch)dbOptions=options??{};}).catch(()=>{if(currentEpoch===epoch)dbOptions={};});
+  schemaReady=currentUser?.role==='root'?api.schema().then(doc=>{if(currentEpoch===epoch)schema=doc;}).catch(error=>{if(currentEpoch===epoch){schema=null;toast('API şeması okunamadı: '+error.message);}}):Promise.resolve();
+  if(currentUser?.role==='root')api.request('ui/options').then(options=>{if(currentEpoch===epoch)dbOptions=options??{};}).catch(()=>{if(currentEpoch===epoch)dbOptions={};});
   render();loadConfig(currentEpoch);pollMeasurements(currentEpoch);
   pollTimer=setInterval(()=>pollMeasurements(currentEpoch),Math.max(1,Number(settings.pollSeconds))*1000);configTimer=setInterval(()=>loadConfig(currentEpoch),5000);
 }
@@ -258,6 +261,7 @@ connect();
 window.addEventListener('message',e=>{
  if(e.origin!==location.origin||e.source!==window.parent||e.data?.type!=='scadawatt.action')return;
  const {action,entity,id,siteId}=e.data;
+ if(!['select','refresh','dismiss','snapshot'].includes(action)&&!busy())for(const d of document.querySelectorAll('dialog[open]'))d.close();
  if(action==='select'){selectedSite=siteId??selectedSite;selectedDevice=id??null;selectedNode=id?`DEVICE:${id}`:`SAHA:${selectedSite}`;refreshModel();render();}
  else if(action==='create'&&ENTITIES[entity])management.open(entity);
  else if(action==='edit'&&ENTITIES[entity])management.open(entity,id);
@@ -280,7 +284,7 @@ document.addEventListener('click',event=>{if(window.parent!==window&&event.targe
 window.addEventListener('message',async e=>{
  if(e.origin!==location.origin||e.source!==window.parent||e.data?.type!=='scadawatt.control')return;
  const {id,path,method='GET',body}=e.data;
- if(!/^(auth\/me|users(?:\/[0-9]+)?|workspace\/[0-9]+|control\/controls|control\/commands(?:\/[0-9a-f-]{36})?|(?:dm|tm|trafo|adp|device)(?:\/[0-9]+)?)$/.test(path)||!['GET','POST','PATCH','PUT'].includes(method))return;
+ if(!/^(auth\/(?:me|collector-connection)|users(?:\/[0-9]+)?|workspace\/[0-9]+(?:\/(?:export|import))?|control\/controls|control\/commands(?:\/[0-9a-f-]{36})?|(?:dm|tm|trafo|adp|device)(?:\/[0-9]+)?)$/.test(path)||!['GET','POST','PATCH','PUT','DELETE'].includes(method))return;
  try{if(demo)throw Error('Gerçek komutlar örnek veri modunda kullanılamaz.');const result=await api.request(path,{method,body});if(method!=='GET'&&!/^(control|workspace|users)\//.test(path))await reloadSettings();window.parent.postMessage({type:'scadawatt.control-result',id,result},location.origin);}
  catch(error){window.parent.postMessage({type:'scadawatt.control-result',id,error:error.message},location.origin);}
 });

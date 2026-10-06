@@ -1431,3 +1431,12 @@ textarea {font:inherit;color:var(--text)}
 @media(max-width:1400px){.header-live{gap:14px}.header-reference{display:none}.topbar{gap:16px}.local-badge{display:none}.site-overview{gap:16px}.site-overview .metric{padding:6px 10px}}
 @media(max-width:1050px){.topbar{flex-wrap:wrap}.header-live{order:3;flex-basis:100%;justify-content:space-between;gap:12px}.topbar .header-right{margin-left:auto}.site-tools>.clock{display:none}#diagram-view{scroll-margin-top:160px}}
 @media(max-width:650px){.site-overview .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-layout{grid-template-columns:1fr}.guide-layout nav{display:none}.config-section{grid-template-columns:1fr}.topbar{padding:10px 14px}.brand strong{font-size:1rem}.topbar .connection{font-size:.65rem}.header-reading strong{font-size:.8rem}.header-reading{min-width:55px}.site-tools .heading-actions{margin-left:0}}
+.restricted-session #open-settings,.restricted-session #open-guide,.restricted-session #guide-resume,.restricted-session #toggle-demo,.restricted-session .management-actions{display:none!important}
+
+/* Embedded configuration occupies a page below the shared topbar. */
+.embedded-settings-page>.topbar,.embedded-settings-page>.shell>.sidebar,.embedded-settings-page .view-tabs,.embedded-settings-page .site-overview,.embedded-settings-page .pipeline-panel,.embedded-settings-page .diagnostics{display:none!important}
+.embedded-settings-page .shell{display:block;margin:0;max-width:none;padding:0}
+.embedded-settings-page .shell>main{padding:20px;margin:0;width:100%;max-width:none}
+.embedded-settings-page dialog[open]{position:fixed!important;inset:0!important;max-width:none!important;max-height:none!important;width:100%!important;height:100%!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:28px!important;overflow:auto!important;box-sizing:border-box}
+.embedded-settings-page dialog::backdrop{background:#0c1715}
+.embedded-settings-page .config-dialog form{max-width:1120px;margin:auto}

@@ -1,0 +1,2 @@
+gpiozero>=2,<3
+rpi-lgpio>=0.6,<1

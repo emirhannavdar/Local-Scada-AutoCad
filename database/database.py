@@ -1,3 +1,4 @@
+import os
 import psycopg
 from psycopg.types.json import Json
 from config import (
@@ -10,11 +11,11 @@ from config import (
 
 def get_connection():
     return psycopg.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
+        host=os.getenv("DB_HOST", DB_HOST),
+        port=os.getenv("DB_PORT", DB_PORT),
+        dbname=os.getenv("DB_NAME", DB_NAME),
+        user=os.getenv("DB_USER", DB_USER),
+        password=os.getenv("DB_PASSWORD", DB_PASSWORD)
     )
 
 def save_measurement(device_id, data):
