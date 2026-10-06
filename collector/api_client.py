@@ -5,8 +5,21 @@ import requests
 
 API_BASE_URL = os.getenv(
     "SCADA_API_URL",
-    "http://192.168.1.35:8000/api/v1"
+    "http://127.0.0.1:8000/api/v1"
 )
+
+def _headers():
+    token = os.getenv("SCADA_API_TOKEN", "").strip()
+    return {"Authorization": f"Bearer {token}"} if token else {}
+
+
+def _get(url, **kwargs):
+    return requests.get(url, headers=_headers(), **kwargs)
+
+
+def _post(url, **kwargs):
+    return requests.post(url, headers=_headers(), **kwargs)
+
 
 TIMEOUT = float(
     os.getenv(
@@ -18,7 +31,7 @@ TIMEOUT = float(
 
 def get_data(path):
 
-    response = requests.get(
+    response = _get(
         f"{API_BASE_URL}/{path}",
         timeout=TIMEOUT
     )
@@ -75,7 +88,7 @@ def post_measurement(
         "kalite": quality
     }
 
-    response = requests.post(
+    response = _post(
         f"{API_BASE_URL}/measurement",
         json=data,
         timeout=TIMEOUT
@@ -101,7 +114,7 @@ _BATCH_SUPPORTED = True
 
 def post_data(path, body):
 
-    response = requests.post(
+    response = _post(
         f"{API_BASE_URL}/{path}",
         json=body,
         timeout=TIMEOUT
@@ -143,7 +156,7 @@ def post_measurements(rows):
 
     if _BATCH_SUPPORTED:
 
-        response = requests.post(
+        response = _post(
             f"{API_BASE_URL}/measurement/batch",
             json=rows,
             timeout=TIMEOUT

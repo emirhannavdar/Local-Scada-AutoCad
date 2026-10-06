@@ -1,4 +1,4 @@
-"""ScadaWatt ikinci cihaz: dağınık PDU adresleri, Modbus TCP FC03/FC04.
+"""ScadaWatt ikinci cihaz: dağınık PDU adresleri, Modbus TCP FC03/FC04 okuma ve FC06 kesici yazma.
 Yalnızca Python standart kütüphanesi gerekir. OSTIM dosyasından bağımsızdır.
 """
 import argparse
@@ -111,10 +111,21 @@ class Analyzer:
 def exception(fc, code):
     return bytes([fc | 0x80, code])
 
+BREAKER_STATE = 1
+
 def process_pdu(pdu):
+    global BREAKER_STATE
     if not pdu:
         return b""
     fc = pdu[0]
+    if fc == 6:
+        if len(pdu) != 5: return exception(fc, 3)
+        address, value = struct.unpack(">HH", pdu[1:])
+        if address != 48000: return exception(fc, 2)
+        if value not in (0, 1): return exception(fc, 3)
+        BREAKER_STATE = value
+        REGS[48000] = value
+        return pdu
     if fc not in (3, 4):
         return exception(fc, 1)
     if len(pdu) != 5:
@@ -203,18 +214,21 @@ def self_test():
     print(f"SELF-TEST OK | {len(REGISTER_MAP)} ölçüm, FC03/FC04, 5 blok, adres boşlukları, veri tipleri, kesici açık")
 
 async def run(args):
+    global BREAKER_STATE
+    BREAKER_STATE = args.breaker
     initialise_register_space(args.strict)
     analyzer = Analyzer(args.seed)
-    write_registers(analyzer.step(args.breaker))
+    write_registers(analyzer.step(BREAKER_STATE))
     server = await asyncio.start_server(make_handler(args.unit, args.verbose), args.host, args.port)
     print(f"SCADAWATT DAGINIK REGISTER SIMULATOR | {args.host}:{args.port} | Unit={args.unit}")
     print("Bloklar:", ", ".join(f"{a}-{b}" for a, b in BLOCKS))
     print_register_map()
+    print("KONTROL | FC06 PDU 48000 | 0=AC 1=KAPAT | durum FC03/04 PDU 48000", flush=True)
     async def update():
         last_print = time.monotonic()
         while True:
             await asyncio.sleep(args.interval)
-            write_registers(analyzer.step(args.breaker))
+            write_registers(analyzer.step(BREAKER_STATE))
             if args.print_every > 0 and time.monotonic() - last_print >= args.print_every:
                 last_print = time.monotonic()
                 print(f"DATA | P={VALUES['grid_active_power']:.2f} kW | "

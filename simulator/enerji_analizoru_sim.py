@@ -102,8 +102,31 @@ REGISTER_MAP = [
 ]
 
 
+STAGES = [
+    ("kosk", 30600, "breaker_status"),
+    ("tm", 30612, "tm_breaker_status"),
+    ("trafo", 30614, "trafo_breaker_status"),
+    ("dm", 30616, "dm_breaker_status"),
+]
+SWITCHES = {address: True for _, address, _ in STAGES}
+for index, (stage, address, status_key) in enumerate(STAGES):
+    if address != 30600:
+        REGISTER_MAP.append(RegisterDefinition(address, status_key, stage.upper()+" kesici kontağı", "1", "UINT16"))
+    base = 31000 + index * 20
+    for offset, suffix, label, unit, kind in [
+        (0, "input_voltage", "Giriş gerilimi L1-N", "V", "FLOAT32"),
+        (2, "output_voltage", "Çıkış gerilimi L1-N", "V", "FLOAT32"),
+        (4, "output_current", "Çıkış akımı L1", "A", "FLOAT32"),
+        (6, "output_power", "Çıkış aktif güç toplam", "kW", "FLOAT32"),
+        (8, "output_energized", "Çıkışta gerilim var", "1", "UINT16"),
+    ]:
+        REGISTER_MAP.append(RegisterDefinition(base+offset, stage+"_"+suffix, stage.upper()+" "+label, unit, kind))
+
 REGS = {}
 VALUES = {}
+BREAKER_CLOSED = True
+ACTIVE_ANALYZER = None
+BREAKER_ADDRESS = 30600
 
 MIN_ADDRESS = min(item.address for item in REGISTER_MAP)
 
@@ -247,6 +270,13 @@ class Analyzer:
             for _ in range(3)
         ]
 
+        source_voltage = list(voltage)
+        circuit_live = all(SWITCHES.values())
+        if not circuit_live:
+            current = [0.0, 0.0, 0.0]
+            voltage = [0.0, 0.0, 0.0]
+            v12 = v23 = v31 = 0.0
+
         active_power = [
             voltage[index]
             * current[index]
@@ -318,7 +348,7 @@ class Analyzer:
             / 3600
         )
 
-        if random.random() < 0.05:
+        if circuit_live and random.random() < 0.05:
             self.e_exp += (
                 random.uniform(0, 3)
                 * dt
@@ -326,7 +356,7 @@ class Analyzer:
             )
 
         self.eq_cap += (
-            random.uniform(0, 0.1)
+            (random.uniform(0, 0.1) if circuit_live else 0)
             * dt
             / 3600
         )
@@ -371,7 +401,7 @@ class Analyzer:
             self.alarm_count += 1
 
         status = 1
-        breaker_status = 1
+        breaker_status = int(SWITCHES[30600])
         remote_mode = 1
         device_error = 0
 
@@ -402,6 +432,7 @@ class Analyzer:
             )
             / voltage_average
             * 100
+            if voltage_average > 0 else 0
         )
 
         current_unbalance = (
@@ -425,7 +456,7 @@ class Analyzer:
             now - self.start_time
         )
 
-        return {
+        result = {
             "v_l1n": voltage[0],
             "v_l2n": voltage[1],
             "v_l3n": voltage[2],
@@ -506,6 +537,18 @@ class Analyzer:
 
             "test_counter": uptime
         }
+
+        input_live = True
+        for stage, address, status_key in STAGES:
+            output_live = input_live and SWITCHES[address]
+            result[status_key] = int(SWITCHES[address])
+            result[stage+"_input_voltage"] = source_voltage[0] if input_live else 0.0
+            result[stage+"_output_voltage"] = source_voltage[0] if output_live else 0.0
+            result[stage+"_output_current"] = current[0]
+            result[stage+"_output_power"] = p_total
+            result[stage+"_output_energized"] = int(output_live)
+            input_live = output_live
+        return result
 
 
 def encode_value(value, data_type):
@@ -625,10 +668,30 @@ def exception(function_code, code):
 
 
 def process_pdu(pdu):
+    global BREAKER_CLOSED
     if not pdu:
         return b""
 
     function_code = pdu[0]
+
+    if function_code == 6:
+        if len(pdu) != 5:
+            return exception(function_code, 3)
+        address, value = struct.unpack(">HH", pdu[1:5])
+        if address not in SWITCHES:
+            return exception(function_code, 2)
+        if value not in (0, 1):
+            return exception(function_code, 3)
+        SWITCHES[address] = bool(value)
+        BREAKER_CLOSED = SWITCHES[30600]
+        if ACTIVE_ANALYZER is not None:
+            write_registers(ACTIVE_ANALYZER.step())
+        else:
+            REGS[address] = value
+            key = next(key for _, addr, key in STAGES if addr == address)
+            VALUES[key] = value
+        print(f"COMMAND | FC06 | PDU={address} | BREAKER={'CLOSED' if value else 'OPEN'}")
+        return pdu
 
     if function_code not in (
         3,
@@ -837,11 +900,13 @@ async def print_values(interval):
             f"P={VALUES.get('p_tot', 0):.2f} kW | "
             f"PF={VALUES.get('pf_tot', 0):.3f} | "
             f"F={VALUES.get('freq', 0):.3f} Hz | "
-            f"T={VALUES.get('temperature', 0):.1f} C"
+            f"T={VALUES.get('temperature', 0):.1f} C | "
+            f"BREAKER={VALUES.get('breaker_status', 0)}"
         )
 
 
 async def main():
+    global ACTIVE_ANALYZER
     parser = argparse.ArgumentParser(
         description="SCADA WATT gelişmiş Modbus TCP simulator"
     )
@@ -899,6 +964,8 @@ async def main():
     analyzer = Analyzer(
         seed_offset=args.seed_offset
     )
+
+    ACTIVE_ANALYZER = analyzer
 
     write_registers(
         analyzer.step()

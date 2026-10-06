@@ -65,7 +65,8 @@ def create_client(
         return ModbusTcpClient(
             host=device["ip"],
             port=device["port"],
-            timeout=3
+            timeout=3,
+            retries=0
         )
 
     if protocol == "MODBUS_RTU":
@@ -107,7 +108,8 @@ def create_client(
             bytesize=line["databits"],
             stopbits=line["stopbits"],
             parity=parity,
-            timeout=3
+            timeout=3,
+            retries=0
         )
 
     if protocol == "IEC_61850":

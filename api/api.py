@@ -1,3 +1,4 @@
+import os
 import logging
 import time
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ from api.measurement import measurement
 from api.serialLine import serialLine
 from api.site import site
 from api.ui_metadata import ui_metadata
+from api.access_guard import install_access_guard
 
 app = FastAPI(
     title="Modbus REST API",
@@ -27,12 +29,11 @@ app = FastAPI(
     version="1.0.0"
 )
 
+install_access_guard(app)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ],
+    allow_origins=[x.strip() for x in os.getenv("SCADA_CORS_ORIGINS", "http://127.0.0.1:5500,http://localhost:5500").split(",") if x.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -165,3 +166,13 @@ app.include_router(
 
 
 
+
+from api.control import router as control_router
+app.include_router(control_router,prefix='/api/v1/control',tags=['Kesici komutları'])
+from api.auth import router as auth_router
+app.include_router(auth_router, prefix='/api/v1/auth', tags=['API oturumu'])
+
+from api.users import router as user_router
+from api.workspaces import router as workspace_router
+app.include_router(user_router,prefix='/api/v1/users',tags=['Kullanıcılar ve saha yetkileri'])
+app.include_router(workspace_router,prefix='/api/v1/workspace',tags=['Paylaşılan saha şemaları'])

@@ -3,6 +3,7 @@ import json
 import math
 import os
 import time
+from collector.runtime_config import assigned_devices
 
 from collector.api_client import (
     get_devices,
@@ -1077,6 +1078,8 @@ async def get_configuration():
         get_devices
     )
 
+    devices = assigned_devices(devices)
+
     groups = await asyncio.to_thread(
         get_read_groups
     )
@@ -1170,6 +1173,9 @@ async def stop_task(task):
 
 async def main():
 
+    from collector.command_worker import command_loop
+    command_task = asyncio.create_task(command_loop())
+
     print(
         "SCADA Collector başlatıldı"
     )
@@ -1177,6 +1183,9 @@ async def main():
     running = {}
 
     while True:
+
+        if command_task.done() and command_task.exception():
+            raise command_task.exception()
 
         try:
 
