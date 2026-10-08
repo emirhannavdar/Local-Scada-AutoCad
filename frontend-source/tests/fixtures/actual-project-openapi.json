@@ -1,0 +1,3312 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Request models and routes extracted from supplied localScada(2).zip; no live DB",
+    "version": "4"
+  },
+  "paths": {
+    "/api/v1/saha": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "code": {
+                    "title": "Code",
+                    "type": "string"
+                  },
+                  "kurulu_guc_kwp": {
+                    "title": "Kurulu Guc Kwp",
+                    "type": "number"
+                  },
+                  "loc": {
+                    "title": "Loc",
+                    "type": "string"
+                  },
+                  "timeZone": {
+                    "title": "Timezone",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "varsayilan_carpan": {
+                    "default": 1.0,
+                    "title": "Varsayilan Carpan",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "name",
+                  "code",
+                  "kurulu_guc_kwp",
+                  "loc",
+                  "timeZone"
+                ],
+                "title": "Scada",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/saha/{saha_id}": {
+      "get": {}
+    },
+    "/api/v1/saha/{id}": {
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "code": {
+                    "title": "Code",
+                    "type": "string"
+                  },
+                  "kurulu_guc_kwp": {
+                    "title": "Kurulu Guc Kwp",
+                    "type": "number"
+                  },
+                  "loc": {
+                    "title": "Loc",
+                    "type": "string"
+                  },
+                  "timeZone": {
+                    "title": "Timezone",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "varsayilan_carpan": {
+                    "default": 1.0,
+                    "title": "Varsayilan Carpan",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "name",
+                  "code",
+                  "kurulu_guc_kwp",
+                  "loc",
+                  "timeZone"
+                ],
+                "title": "Scada",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "code": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Code"
+                  },
+                  "kurulu_guc_kwp": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Kurulu Guc Kwp"
+                  },
+                  "loc": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Loc"
+                  },
+                  "timeZone": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Timezone"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  },
+                  "varsayilan_carpan": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Varsayilan Carpan"
+                  }
+                },
+                "title": "ScadaPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/device": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ust_dugum_tipi": {
+                    "title": "Ust Dugum Tipi",
+                    "type": "string"
+                  },
+                  "ust_dugum_id": {
+                    "title": "Ust Dugum Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "profil_id": {
+                    "title": "Profil Id",
+                    "type": "integer"
+                  },
+                  "profil_surum": {
+                    "title": "Profil Surum",
+                    "type": "string"
+                  },
+                  "protokol": {
+                    "title": "Protokol",
+                    "type": "string"
+                  },
+                  "ip": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Ip"
+                  },
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Port"
+                  },
+                  "slave_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Slave Id"
+                  },
+                  "seri_hat_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Seri Hat Id"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "bakim_modu": {
+                    "default": false,
+                    "title": "Bakim Modu",
+                    "type": "boolean"
+                  },
+                  "durum": {
+                    "default": "UNKNOWN",
+                    "title": "Durum",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ust_dugum_tipi",
+                  "ust_dugum_id",
+                  "name",
+                  "profil_id",
+                  "profil_surum",
+                  "protokol"
+                ],
+                "title": "ScadaDevice",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/device/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ust_dugum_tipi": {
+                    "title": "Ust Dugum Tipi",
+                    "type": "string"
+                  },
+                  "ust_dugum_id": {
+                    "title": "Ust Dugum Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "profil_id": {
+                    "title": "Profil Id",
+                    "type": "integer"
+                  },
+                  "profil_surum": {
+                    "title": "Profil Surum",
+                    "type": "string"
+                  },
+                  "protokol": {
+                    "title": "Protokol",
+                    "type": "string"
+                  },
+                  "ip": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Ip"
+                  },
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Port"
+                  },
+                  "slave_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Slave Id"
+                  },
+                  "seri_hat_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Seri Hat Id"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "bakim_modu": {
+                    "default": false,
+                    "title": "Bakim Modu",
+                    "type": "boolean"
+                  },
+                  "durum": {
+                    "default": "UNKNOWN",
+                    "title": "Durum",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ust_dugum_tipi",
+                  "ust_dugum_id",
+                  "name",
+                  "profil_id",
+                  "profil_surum",
+                  "protokol"
+                ],
+                "title": "ScadaDevice",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ust_dugum_tipi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Ust Dugum Tipi"
+                  },
+                  "ust_dugum_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Ust Dugum Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "profil_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profil Id"
+                  },
+                  "profil_surum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profil Surum"
+                  },
+                  "protokol": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Protokol"
+                  },
+                  "ip": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Ip"
+                  },
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Port"
+                  },
+                  "slave_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Slave Id"
+                  },
+                  "seri_hat_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Seri Hat Id"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  },
+                  "bakim_modu": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Bakim Modu"
+                  },
+                  "durum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Durum"
+                  }
+                },
+                "title": "ScadaDevicePatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/device_profile": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "marka": {
+                    "title": "Marka",
+                    "type": "string"
+                  },
+                  "model": {
+                    "title": "Model",
+                    "type": "string"
+                  },
+                  "device_type": {
+                    "title": "Device Type",
+                    "type": "string"
+                  },
+                  "protocol": {
+                    "title": "Protocol",
+                    "type": "string"
+                  },
+                  "surum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Surum"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "marka",
+                  "model",
+                  "device_type",
+                  "protocol"
+                ],
+                "title": "ScadaDeviceProfile",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/device_profile/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "marka": {
+                    "title": "Marka",
+                    "type": "string"
+                  },
+                  "model": {
+                    "title": "Model",
+                    "type": "string"
+                  },
+                  "device_type": {
+                    "title": "Device Type",
+                    "type": "string"
+                  },
+                  "protocol": {
+                    "title": "Protocol",
+                    "type": "string"
+                  },
+                  "surum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Surum"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "marka",
+                  "model",
+                  "device_type",
+                  "protocol"
+                ],
+                "title": "ScadaDeviceProfile",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "marka": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Marka"
+                  },
+                  "model": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Model"
+                  },
+                  "device_type": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Device Type"
+                  },
+                  "protocol": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Protocol"
+                  },
+                  "surum": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Surum"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  }
+                },
+                "title": "ScadaDeviceProfilePatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile_register": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "profile_id": {
+                    "title": "Profile Id",
+                    "type": "integer"
+                  },
+                  "register_adresi": {
+                    "title": "Register Adresi",
+                    "type": "integer"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "register_sayisi": {
+                    "title": "Register Sayisi",
+                    "type": "integer"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "byte_order": {
+                    "title": "Byte Order",
+                    "type": "string"
+                  },
+                  "word_order": {
+                    "title": "Word Order",
+                    "type": "string"
+                  },
+                  "olcek": {
+                    "title": "Olcek",
+                    "type": "number"
+                  },
+                  "offset_degeri": {
+                    "title": "Offset Degeri",
+                    "type": "number"
+                  },
+                  "bit_index": {
+                    "title": "Bit Index",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  }
+                },
+                "required": [
+                  "profile_id",
+                  "register_adresi",
+                  "function_code",
+                  "register_sayisi",
+                  "veri_tipi",
+                  "byte_order",
+                  "word_order",
+                  "olcek",
+                  "offset_degeri",
+                  "bit_index",
+                  "sinyal_sozlugu_id"
+                ],
+                "title": "ScadaProfileRegister",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profile_register/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "profile_id": {
+                    "title": "Profile Id",
+                    "type": "integer"
+                  },
+                  "register_adresi": {
+                    "title": "Register Adresi",
+                    "type": "integer"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "register_sayisi": {
+                    "title": "Register Sayisi",
+                    "type": "integer"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "byte_order": {
+                    "title": "Byte Order",
+                    "type": "string"
+                  },
+                  "word_order": {
+                    "title": "Word Order",
+                    "type": "string"
+                  },
+                  "olcek": {
+                    "title": "Olcek",
+                    "type": "number"
+                  },
+                  "offset_degeri": {
+                    "title": "Offset Degeri",
+                    "type": "number"
+                  },
+                  "bit_index": {
+                    "title": "Bit Index",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  }
+                },
+                "required": [
+                  "profile_id",
+                  "register_adresi",
+                  "function_code",
+                  "register_sayisi",
+                  "veri_tipi",
+                  "byte_order",
+                  "word_order",
+                  "olcek",
+                  "offset_degeri",
+                  "bit_index",
+                  "sinyal_sozlugu_id"
+                ],
+                "title": "ScadaProfileRegister",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "profile_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profile Id"
+                  },
+                  "register_adresi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Register Adresi"
+                  },
+                  "function_code": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Function Code"
+                  },
+                  "register_sayisi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Register Sayisi"
+                  },
+                  "veri_tipi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Veri Tipi"
+                  },
+                  "byte_order": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Byte Order"
+                  },
+                  "word_order": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Word Order"
+                  },
+                  "olcek": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Olcek"
+                  },
+                  "offset_degeri": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Offset Degeri"
+                  },
+                  "bit_index": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Bit Index"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sinyal Sozlugu Id"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  }
+                },
+                "title": "ScadaProfileRegisterPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signalDict": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "sinyal_adi": {
+                    "title": "Sinyal Adi",
+                    "type": "string"
+                  },
+                  "aciklama": {
+                    "title": "Aciklama",
+                    "type": "string"
+                  },
+                  "cihaz_tipi": {
+                    "title": "Cihaz Tipi",
+                    "type": "string"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "min_deger": {
+                    "title": "Min Deger",
+                    "type": "number"
+                  },
+                  "max_deger": {
+                    "title": "Max Deger",
+                    "type": "number"
+                  },
+                  "alarm_sinifi": {
+                    "title": "Alarm Sinifi",
+                    "type": "string"
+                  },
+                  "arsiv_kurali": {
+                    "title": "Arsiv Kurali",
+                    "type": "string"
+                  },
+                  "okuma_sinifi": {
+                    "title": "Okuma Sinifi",
+                    "type": "string"
+                  },
+                  "deadband": {
+                    "title": "Deadband",
+                    "type": "number"
+                  },
+                  "periyot_saniye": {
+                    "title": "Periyot Saniye",
+                    "type": "integer"
+                  },
+                  "gosterim_formati": {
+                    "title": "Gosterim Formati",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "sinyal_adi",
+                  "aciklama",
+                  "cihaz_tipi",
+                  "veri_tipi",
+                  "birim",
+                  "min_deger",
+                  "max_deger",
+                  "alarm_sinifi",
+                  "arsiv_kurali",
+                  "okuma_sinifi",
+                  "deadband",
+                  "periyot_saniye",
+                  "gosterim_formati"
+                ],
+                "title": "ScadaSinyalDict",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/signalDict/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "sinyal_adi": {
+                    "title": "Sinyal Adi",
+                    "type": "string"
+                  },
+                  "aciklama": {
+                    "title": "Aciklama",
+                    "type": "string"
+                  },
+                  "cihaz_tipi": {
+                    "title": "Cihaz Tipi",
+                    "type": "string"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "min_deger": {
+                    "title": "Min Deger",
+                    "type": "number"
+                  },
+                  "max_deger": {
+                    "title": "Max Deger",
+                    "type": "number"
+                  },
+                  "alarm_sinifi": {
+                    "title": "Alarm Sinifi",
+                    "type": "string"
+                  },
+                  "arsiv_kurali": {
+                    "title": "Arsiv Kurali",
+                    "type": "string"
+                  },
+                  "okuma_sinifi": {
+                    "title": "Okuma Sinifi",
+                    "type": "string"
+                  },
+                  "deadband": {
+                    "title": "Deadband",
+                    "type": "number"
+                  },
+                  "periyot_saniye": {
+                    "title": "Periyot Saniye",
+                    "type": "integer"
+                  },
+                  "gosterim_formati": {
+                    "title": "Gosterim Formati",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "sinyal_adi",
+                  "aciklama",
+                  "cihaz_tipi",
+                  "veri_tipi",
+                  "birim",
+                  "min_deger",
+                  "max_deger",
+                  "alarm_sinifi",
+                  "arsiv_kurali",
+                  "okuma_sinifi",
+                  "deadband",
+                  "periyot_saniye",
+                  "gosterim_formati"
+                ],
+                "title": "ScadaSinyalDict",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "sinyal_adi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sinyal Adi"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "cihaz_tipi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cihaz Tipi"
+                  },
+                  "veri_tipi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Veri Tipi"
+                  },
+                  "birim": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Birim"
+                  },
+                  "min_deger": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Min Deger"
+                  },
+                  "max_deger": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Max Deger"
+                  },
+                  "alarm_sinifi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Alarm Sinifi"
+                  },
+                  "arsiv_kurali": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Arsiv Kurali"
+                  },
+                  "okuma_sinifi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Okuma Sinifi"
+                  },
+                  "deadband": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Deadband"
+                  },
+                  "periyot_saniye": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Periyot Saniye"
+                  },
+                  "gosterim_formati": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Gosterim Formati"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  }
+                },
+                "title": "ScadaSinyalDictPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readGroup": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "baslangic_adresi": {
+                    "title": "Baslangic Adresi",
+                    "type": "integer"
+                  },
+                  "bitis_adresi": {
+                    "title": "Bitis Adresi",
+                    "type": "integer"
+                  },
+                  "okuma_periyodu_ms": {
+                    "title": "Okuma Periyodu Ms",
+                    "type": "integer"
+                  },
+                  "maksimum_register": {
+                    "title": "Maksimum Register",
+                    "type": "integer"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "aciklama": {
+                    "title": "Aciklama",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "name",
+                  "function_code",
+                  "baslangic_adresi",
+                  "bitis_adresi",
+                  "okuma_periyodu_ms",
+                  "maksimum_register",
+                  "aciklama"
+                ],
+                "title": "ScadaReadGroup",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/readGroup/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "baslangic_adresi": {
+                    "title": "Baslangic Adresi",
+                    "type": "integer"
+                  },
+                  "bitis_adresi": {
+                    "title": "Bitis Adresi",
+                    "type": "integer"
+                  },
+                  "okuma_periyodu_ms": {
+                    "title": "Okuma Periyodu Ms",
+                    "type": "integer"
+                  },
+                  "maksimum_register": {
+                    "title": "Maksimum Register",
+                    "type": "integer"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "aciklama": {
+                    "title": "Aciklama",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "name",
+                  "function_code",
+                  "baslangic_adresi",
+                  "bitis_adresi",
+                  "okuma_periyodu_ms",
+                  "maksimum_register",
+                  "aciklama"
+                ],
+                "title": "ScadaReadGroup",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cihaz Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "function_code": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Function Code"
+                  },
+                  "baslangic_adresi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Baslangic Adresi"
+                  },
+                  "bitis_adresi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Bitis Adresi"
+                  },
+                  "okuma_periyodu_ms": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Okuma Periyodu Ms"
+                  },
+                  "maksimum_register": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Maksimum Register"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  }
+                },
+                "title": "ScadaReadGroupPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/register": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "profil_register_id": {
+                    "title": "Profil Register Id",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "baslangic_adresi": {
+                    "title": "Baslangic Adresi",
+                    "type": "integer"
+                  },
+                  "register_sayisi": {
+                    "title": "Register Sayisi",
+                    "type": "integer"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "word_order": {
+                    "title": "Word Order",
+                    "type": "string"
+                  },
+                  "byte_order": {
+                    "title": "Byte Order",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "carpan": {
+                    "title": "Carpan",
+                    "type": "number"
+                  },
+                  "min_deger": {
+                    "title": "Min Deger",
+                    "type": "number"
+                  },
+                  "max_deger": {
+                    "title": "Max Deger",
+                    "type": "number"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "okuma_grubu_id": {
+                    "title": "Okuma Grubu Id",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "profil_register_id",
+                  "sinyal_sozlugu_id",
+                  "name",
+                  "baslangic_adresi",
+                  "register_sayisi",
+                  "function_code",
+                  "veri_tipi",
+                  "word_order",
+                  "byte_order",
+                  "birim",
+                  "carpan",
+                  "min_deger",
+                  "max_deger",
+                  "okuma_grubu_id"
+                ],
+                "title": "ScadaRegister",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/register/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "profil_register_id": {
+                    "title": "Profil Register Id",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "baslangic_adresi": {
+                    "title": "Baslangic Adresi",
+                    "type": "integer"
+                  },
+                  "register_sayisi": {
+                    "title": "Register Sayisi",
+                    "type": "integer"
+                  },
+                  "function_code": {
+                    "title": "Function Code",
+                    "type": "integer"
+                  },
+                  "veri_tipi": {
+                    "title": "Veri Tipi",
+                    "type": "string"
+                  },
+                  "word_order": {
+                    "title": "Word Order",
+                    "type": "string"
+                  },
+                  "byte_order": {
+                    "title": "Byte Order",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "carpan": {
+                    "title": "Carpan",
+                    "type": "number"
+                  },
+                  "min_deger": {
+                    "title": "Min Deger",
+                    "type": "number"
+                  },
+                  "max_deger": {
+                    "title": "Max Deger",
+                    "type": "number"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "okuma_grubu_id": {
+                    "title": "Okuma Grubu Id",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "profil_register_id",
+                  "sinyal_sozlugu_id",
+                  "name",
+                  "baslangic_adresi",
+                  "register_sayisi",
+                  "function_code",
+                  "veri_tipi",
+                  "word_order",
+                  "byte_order",
+                  "birim",
+                  "carpan",
+                  "min_deger",
+                  "max_deger",
+                  "okuma_grubu_id"
+                ],
+                "title": "ScadaRegister",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cihaz Id"
+                  },
+                  "profil_register_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profil Register Id"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sinyal Sozlugu Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "baslangic_adresi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Baslangic Adresi"
+                  },
+                  "register_sayisi": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Register Sayisi"
+                  },
+                  "function_code": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Function Code"
+                  },
+                  "veri_tipi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Veri Tipi"
+                  },
+                  "word_order": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Word Order"
+                  },
+                  "byte_order": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Byte Order"
+                  },
+                  "birim": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Birim"
+                  },
+                  "carpan": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Carpan"
+                  },
+                  "min_deger": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Min Deger"
+                  },
+                  "max_deger": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Max Deger"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  },
+                  "aciklama": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aciklama"
+                  },
+                  "okuma_grubu_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Okuma Grubu Id"
+                  }
+                },
+                "title": "ScadaRegisterPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tag": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "profil_register_id": {
+                    "title": "Profil Register Id",
+                    "type": "integer"
+                  },
+                  "sinyal_adi": {
+                    "title": "Sinyal Adi",
+                    "type": "string"
+                  },
+                  "tag_adi": {
+                    "title": "Tag Adi",
+                    "type": "string"
+                  },
+                  "tip": {
+                    "title": "Tip",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "olcek": {
+                    "title": "Olcek",
+                    "type": "number"
+                  },
+                  "okuma_sinifi": {
+                    "title": "Okuma Sinifi",
+                    "type": "string"
+                  },
+                  "arsiv_kurali": {
+                    "title": "Arsiv Kurali",
+                    "type": "string"
+                  },
+                  "alarm_sinifi": {
+                    "title": "Alarm Sinifi",
+                    "type": "string"
+                  },
+                  "deadband": {
+                    "title": "Deadband",
+                    "type": "number"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "register_id": {
+                    "title": "Register Id",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "sinyal_sozlugu_id",
+                  "profil_register_id",
+                  "sinyal_adi",
+                  "tag_adi",
+                  "tip",
+                  "birim",
+                  "olcek",
+                  "okuma_sinifi",
+                  "arsiv_kurali",
+                  "alarm_sinifi",
+                  "deadband",
+                  "register_id"
+                ],
+                "title": "ScadaTag",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tag/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "title": "Cihaz Id",
+                    "type": "integer"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "title": "Sinyal Sozlugu Id",
+                    "type": "integer"
+                  },
+                  "profil_register_id": {
+                    "title": "Profil Register Id",
+                    "type": "integer"
+                  },
+                  "sinyal_adi": {
+                    "title": "Sinyal Adi",
+                    "type": "string"
+                  },
+                  "tag_adi": {
+                    "title": "Tag Adi",
+                    "type": "string"
+                  },
+                  "tip": {
+                    "title": "Tip",
+                    "type": "string"
+                  },
+                  "birim": {
+                    "title": "Birim",
+                    "type": "string"
+                  },
+                  "olcek": {
+                    "title": "Olcek",
+                    "type": "number"
+                  },
+                  "okuma_sinifi": {
+                    "title": "Okuma Sinifi",
+                    "type": "string"
+                  },
+                  "arsiv_kurali": {
+                    "title": "Arsiv Kurali",
+                    "type": "string"
+                  },
+                  "alarm_sinifi": {
+                    "title": "Alarm Sinifi",
+                    "type": "string"
+                  },
+                  "deadband": {
+                    "title": "Deadband",
+                    "type": "number"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  },
+                  "register_id": {
+                    "title": "Register Id",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "cihaz_id",
+                  "sinyal_sozlugu_id",
+                  "profil_register_id",
+                  "sinyal_adi",
+                  "tag_adi",
+                  "tip",
+                  "birim",
+                  "olcek",
+                  "okuma_sinifi",
+                  "arsiv_kurali",
+                  "alarm_sinifi",
+                  "deadband",
+                  "register_id"
+                ],
+                "title": "ScadaTag",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "cihaz_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Cihaz Id"
+                  },
+                  "sinyal_sozlugu_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sinyal Sozlugu Id"
+                  },
+                  "profil_register_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Profil Register Id"
+                  },
+                  "sinyal_adi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sinyal Adi"
+                  },
+                  "tag_adi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Tag Adi"
+                  },
+                  "tip": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Tip"
+                  },
+                  "birim": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Birim"
+                  },
+                  "olcek": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Olcek"
+                  },
+                  "okuma_sinifi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Okuma Sinifi"
+                  },
+                  "arsiv_kurali": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Arsiv Kurali"
+                  },
+                  "alarm_sinifi": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Alarm Sinifi"
+                  },
+                  "deadband": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Deadband"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  },
+                  "register_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Register Id"
+                  }
+                },
+                "title": "ScadaTagPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/serialLine": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "port": {
+                    "title": "Port",
+                    "type": "string"
+                  },
+                  "baudrate": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Baudrate"
+                  },
+                  "databits": {
+                    "default": 8,
+                    "title": "Databits",
+                    "type": "integer"
+                  },
+                  "stopbits": {
+                    "default": 1,
+                    "title": "Stopbits",
+                    "type": "integer"
+                  },
+                  "parity": {
+                    "default": "NONE",
+                    "title": "Parity",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "port"
+                ],
+                "title": "ScadaSerialLine",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/serialLine/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "port": {
+                    "title": "Port",
+                    "type": "string"
+                  },
+                  "baudrate": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Baudrate"
+                  },
+                  "databits": {
+                    "default": 8,
+                    "title": "Databits",
+                    "type": "integer"
+                  },
+                  "stopbits": {
+                    "default": 1,
+                    "title": "Stopbits",
+                    "type": "integer"
+                  },
+                  "parity": {
+                    "default": "NONE",
+                    "title": "Parity",
+                    "type": "string"
+                  },
+                  "aktif": {
+                    "default": true,
+                    "title": "Aktif",
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "port"
+                ],
+                "title": "ScadaSerialLine",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "port": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Port"
+                  },
+                  "baudrate": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Baudrate"
+                  },
+                  "databits": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Databits"
+                  },
+                  "stopbits": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Stopbits"
+                  },
+                  "parity": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Parity"
+                  },
+                  "aktif": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Aktif"
+                  }
+                },
+                "title": "ScadaSerialLinePatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dm": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "saha_id": {
+                    "title": "Saha Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "sira": {
+                    "title": "Sira",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "saha_id",
+                  "name",
+                  "sira"
+                ],
+                "title": "ScadaDm",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dm/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "saha_id": {
+                    "title": "Saha Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "sira": {
+                    "title": "Sira",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "saha_id",
+                  "name",
+                  "sira"
+                ],
+                "title": "ScadaDm",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "saha_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Saha Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "sira": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sira"
+                  }
+                },
+                "title": "ScadaDmPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tm": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "dm_id": {
+                    "title": "Dm Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "sira": {
+                    "title": "Sira",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "dm_id",
+                  "name",
+                  "sira"
+                ],
+                "title": "ScadaTm",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tm/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "dm_id": {
+                    "title": "Dm Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "sira": {
+                    "title": "Sira",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "dm_id",
+                  "name",
+                  "sira"
+                ],
+                "title": "ScadaTm",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "dm_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Dm Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "sira": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Sira"
+                  }
+                },
+                "title": "ScadaTmPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trafo": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tm_id": {
+                    "title": "Tm Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "guc_kva": {
+                    "title": "Guc Kva",
+                    "type": "number"
+                  },
+                  "oran": {
+                    "title": "Oran",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tm_id",
+                  "name",
+                  "guc_kva",
+                  "oran"
+                ],
+                "title": "ScadaTrafo",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trafo/{id}": {
+      "get": {},
+      "delete": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tm_id": {
+                    "title": "Tm Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  },
+                  "guc_kva": {
+                    "title": "Guc Kva",
+                    "type": "number"
+                  },
+                  "oran": {
+                    "title": "Oran",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "tm_id",
+                  "name",
+                  "guc_kva",
+                  "oran"
+                ],
+                "title": "ScadaTrafo",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "tm_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Tm Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  },
+                  "guc_kva": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Guc Kva"
+                  },
+                  "oran": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Oran"
+                  }
+                },
+                "title": "ScadaTrafoPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/adp": {
+      "get": {},
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "trafo_id": {
+                    "title": "Trafo Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "trafo_id",
+                  "name"
+                ],
+                "title": "ScadaAdp",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/adp/{id}": {
+      "get": {},
+      "put": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "trafo_id": {
+                    "title": "Trafo Id",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "title": "Name",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "trafo_id",
+                  "name"
+                ],
+                "title": "ScadaAdp",
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "delete": {},
+      "patch": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "trafo_id": {
+                    "anyOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Trafo Id"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "default": null,
+                    "title": "Name"
+                  }
+                },
+                "title": "ScadaAdpPatch",
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

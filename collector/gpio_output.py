@@ -52,7 +52,7 @@ class GPIOOutputs:
             self.faults.discard(pin)
             return {'status': 'APPLIED', 'output_active': active,
                     'physical_confirmed': False,
-                    'detail': 'GPIO çıkışı aktif.' if active else 'GPIO çıkışı pasif.'}
+                    'detail': f'Master {self.worker} | BCM {pin} | ' + ('GPIO çıkışı aktif.' if active else 'GPIO çıkışı pasif.')}
         except Exception as error:
             if attempted:
                 self.faults.add(pin)

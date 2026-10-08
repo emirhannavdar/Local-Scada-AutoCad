@@ -1,4 +1,4 @@
-"""Single administrator bootstrap and short lived signed API sessions."""
+"""Single administrator bootstrap and ten-day signed API sessions."""
 import base64
 import hashlib
 import hmac
@@ -13,6 +13,8 @@ from contextlib import contextmanager
 import psycopg
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
+
+SESSION_SECONDS = 10 * 24 * 60 * 60
 
 router = APIRouter()
 _attempts = {}
@@ -39,7 +41,7 @@ def encode(value):
 def issue_token(username, key, now=None, role="root", version=1, user_id=None):
     now = int(time.time() if now is None else now)
     payload = encode(json.dumps({'sub': username, 'uid': user_id, 'role': role, 'ver': version, 'iat': now,
-                                'exp': now + 28800, 'aud': 'scadawatt-api'}, separators=(',', ':')).encode())
+                                'exp': now + SESSION_SECONDS, 'aud': 'scadawatt-api'}, separators=(',', ':')).encode())
     header = encode(b'{"alg":"HS256","typ":"JWT"}')
     unsigned = header + '.' + payload
     return unsigned + '.' + encode(hmac.new(key.encode(), unsigned.encode(), hashlib.sha256).digest())
@@ -114,7 +116,7 @@ def bootstrap(body: Credentials, request: Request, response: Response):
         cursor.execute("INSERT INTO scada_user(username,salt,password_hash,role) VALUES(%s,%s,%s,'root') RETURNING id",(body.username,salt.hex(),hashed))
         user_id=cursor.fetchone()[0]
     response.headers['Cache-Control'] = 'no-store'
-    return {'success': True, 'data': {'username': body.username, 'access_token': issue_token(body.username, os.environ['SCADA_ADMIN_TOKEN'].strip(),user_id=user_id), 'token_type': 'bearer', 'expires_in': 28800}}
+    return {'success': True, 'data': {'username': body.username, 'access_token': issue_token(body.username, os.environ['SCADA_ADMIN_TOKEN'].strip(),user_id=user_id), 'token_type': 'bearer', 'expires_in': SESSION_SECONDS}}
 
 @router.get('/collector-connection')
 def collector_connection(request: Request, response: Response):
@@ -148,7 +150,7 @@ def token(body: Credentials, request: Request, response: Response):
     with _lock:
         _attempts.pop(client, None)
     response.headers['Cache-Control'] = 'no-store'
-    return {'success': True, 'data': {'access_token': issue_token(row[0], key, role=row[3], version=row[4],user_id=row[5]), 'token_type': 'bearer', 'expires_in': 28800}}
+    return {'success': True, 'data': {'access_token': issue_token(row[0], key, role=row[3], version=row[4],user_id=row[5]), 'token_type': 'bearer', 'expires_in': SESSION_SECONDS}}
 
 @router.get('/me')
 def me(request:Request,response:Response):

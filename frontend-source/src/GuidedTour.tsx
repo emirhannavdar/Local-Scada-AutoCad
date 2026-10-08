@@ -1,0 +1,17 @@
+import {useEffect,useState} from 'react';
+const steps=[
+ {title:'Sahanı seç',text:'Üstteki seçiciden üzerinde çalışacağın sahayı seç. Şema ve cihazlar bu sahaya göre değişir.',target:'.site-switcher',action:'canvas'},
+ {title:'Saha kayıtları',text:'Gerçek saha listesi burada. + Saha ekle ile kaydı oluşturabilirsin. Tur kendi başına kayıt oluşturmaz.',target:'#manage-add',action:'list',entity:'sites',core:true},
+ {title:'IP / port yönetimi',text:'Cihaz tablosunda düzenleye basarak IP, port, Unit ID ve cihaz profilini ayarla.',target:'#manage-rows',action:'list',entity:'devices',core:true},
+ {title:'Cihaz profili',text:'Farklı register haritası olan cihazlar için ayrı profil oluştur. Mevcut profil kayıtlarını burada yönet.',target:'#manage-add',action:'list',entity:'profiles',core:true},
+ {title:'Register haritası',text:'Profilini seç. JSON ile toplu ekle üzerinden adres, FC03/FC04, veri tipi, birim ve çarpanları yükle.',target:'.map-toolbar',action:'map',core:true},
+ {title:'Okuma kurulumu',text:'Profil haritasını cihazın register, okuma grubu ve tag kayıtlarına dönüştüren kurulumunu soldaki Profilden okuma kurulumu bölümünden aç. Önce profil registerlarını tamamla.',target:'.settings-sidebar',action:'list',entity:'devices'},
+ {title:'Tuvale öğe ekle',text:'Sol listedeki invertör, trafo, köşk, sayaç, pano veya grubu tutup tuvale bırak. Boş alanı sürükleyerek kaydır.',target:'.device-tool',action:'canvas'},
+ {title:'Bağlantı ve canlı ölçüm',text:'Sağ çıkış ucundan hedefe kablo çek. Çizgiye tıkla ve Bağlantıyı sil ile kaldır. Öğeyi seçince yan panelden API kaydı ve kutuda gösterilecek ölçümü ayarla.',target:'.canvas-viewport',action:'canvas'}
+];
+export default function GuidedTour({step,iframe,onStep,onClose,navigate}:{step:number,iframe:HTMLIFrameElement|null,onStep:(i:number)=>void,onClose:()=>void,navigate:(a:string,e?:string)=>void}){
+ const [rect,setRect]=useState<{x:number,y:number,w:number,h:number}|null>(null),[missing,setMissing]=useState(false);const s=steps[step];
+ useEffect(()=>{setRect(null);navigate(s.action,s.entity);let scrolled=false;const locate=()=>{const doc=s.core?iframe?.contentDocument:document;const el=doc?.querySelector(s.target) as HTMLElement|null;if(!el||!el.getBoundingClientRect().width){setRect(null);setMissing(true);return;}if(!scrolled){el.scrollIntoView({block:'nearest',inline:'nearest'});scrolled=true;}const r=el.getBoundingClientRect(),f=s.core?iframe?.getBoundingClientRect():null;setRect({x:r.left+(f?.left||0),y:r.top+(f?.top||0),w:r.width,h:r.height});setMissing(false);};const t=setInterval(locate,150);locate();return()=>clearInterval(t);},[step,iframe]);
+ const left=rect?Math.max(10,Math.min(innerWidth-340,rect.x+rect.w+12)):innerWidth-350,top=rect?Math.max(10,Math.min(innerHeight-260,rect.y)):100;
+ return <div className="guided-tour" aria-label="Sayfa üzerinde yardımcı">{rect&&<div className="tour-highlight" style={{left:rect.x-4,top:rect.y-4,width:rect.w+8,height:rect.h+8}}/>}<section className="tour-card" style={{left,top}} aria-live="polite"><small>YARDIMCI · {step+1} / {steps.length}</small><button className="tour-close" onClick={onClose} aria-label="Turu kapat">×</button><h3>{s.title}</h3><p>{s.text}</p>{missing&&<p>Bu bölüm henüz hazır değil; önce API bağlantısını ve saha seçimini kontrol et.</p>}<footer><button disabled={step===0} onClick={()=>onStep(step-1)}>Geri</button><button onClick={()=>step===steps.length-1?onClose():onStep(step+1)}>{step===steps.length-1?'Bitir':'İleri'}</button></footer></section></div>;
+}

@@ -1,6 +1,6 @@
-import os
 import logging
 import time
+
 from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, Request
@@ -22,6 +22,12 @@ from api.serialLine import serialLine
 from api.site import site
 from api.ui_metadata import ui_metadata
 from api.access_guard import install_access_guard
+from api.auth import router as auth_router
+from api.control import router as control_router
+from api.users import router as user_router
+from api.workspaces import router as workspace_router
+from html import escape
+from fastapi.responses import HTMLResponse
 
 app = FastAPI(
     title="Modbus REST API",
@@ -31,13 +37,7 @@ app = FastAPI(
 
 install_access_guard(app)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[x.strip() for x in os.getenv("SCADA_CORS_ORIGINS", "http://127.0.0.1:5500,http://localhost:5500").split(",") if x.strip()],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
+
 
 logging.basicConfig(
     filename="accsess.log",
@@ -67,6 +67,32 @@ async def log_requests(request: Request, call_next):
         logger.error(log_message)
     return response
 
+app.include_router(
+    auth_router,
+    prefix='/api/v1/auth',
+    tags=['API oturumu']
+)
+
+app.include_router(
+    user_router,
+    prefix='/api/v1/users',
+    tags=['Kullanıcılar ve saha yetkileri']
+)
+
+app.include_router(
+    control_router,
+    prefix='/api/v1/control',
+    tags=['Kesici komutları']
+)
+
+
+
+app.include_router(
+    workspace_router,
+    prefix='/api/v1/workspace',
+    tags=['Paylaşılan saha şemaları']
+)
+
 
 app.include_router(
     saha,
@@ -83,7 +109,7 @@ app.include_router(
 app.include_router(
     tm,
     prefix="/api/v1/tm",
-    tags=["tm"]
+    tags=["tm"],
 )
 
 app.include_router(
@@ -165,14 +191,117 @@ app.include_router(
 )
 
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.middleware("http")
+async def scadawatt_error_page(request: Request, call_next):
+    response = await call_next(request)
+
+    # Yalnızca tarayıcıda açılan gerçek 404 yanıtlarını dönüştür.
+    accept = request.headers.get("accept", "")
+    if (
+        response.status_code != 404
+        or request.method != "GET"
+        or "text/html" not in accept
+    ):
+        return response
+
+    path = escape(request.url.path)
+
+    return HTMLResponse(
+        status_code=404,
+        headers={"Cache-Control": "no-store"},
+        content=f"""
+            <!DOCTYPE html>
+            <html lang="tr">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>Sayfa bulunamadı · ScadaWatt</title>
+              <style>
+                * {{ box-sizing: border-box; }}
+                body {{
+                  margin: 0;
+                  min-height: 100vh;
+                  background: #091713;
+                  color: #e6f4ef;
+                  font-family: "Segoe UI", sans-serif;
+                }}
+                header {{
+                  padding: 22px 32px;
+                  border-bottom: 1px solid #203e32;
+                  color: #50ddb0;
+                  font-weight: 700;
+                  letter-spacing: 2px;
+                }}
+                main {{
+                  min-height: calc(100vh - 72px);
+                  display: grid;
+                  place-items: center;
+                  padding: 32px 20px;
+                }}
+                article {{ width: 100%; max-width: 580px; }}
+                .label {{
+                  color: #50ddb0;
+                  font-size: 12px;
+                  letter-spacing: 3px;
+                }}
+                .code {{
+                  margin: 12px 0;
+                  font-size: clamp(90px, 20vw, 150px);
+                  font-weight: 800;
+                  line-height: 1;
+                  color: #50ddb0;
+                }}
+                h1 {{ margin: 24px 0 12px; font-size: 28px; }}
+                p {{ color: #a8bfb4; line-height: 1.7; }}
+                .path {{
+                  margin: 24px 0;
+                  padding: 14px 18px;
+                  background: #10271e;
+                  border: 1px solid #254638;
+                  border-radius: 12px;
+                  overflow-wrap: anywhere;
+                  color: #b8d8c9;
+                  font-family: monospace;
+                }}
+                button {{
+                  padding: 13px 22px;
+                  border: none;
+                  border-radius: 10px;
+                  background: #50ddb0;
+                  color: #09251a;
+                  font-weight: 700;
+                  cursor: pointer;
+                }}
+                button:hover {{ background: #79e9c4; }}
+                button:focus-visible {{ outline: 3px solid white; outline-offset: 4px; }}
+              </style>
+            </head>
+            <body>
+              <header>ScadaWatt</header>
+              <main>
+                <article>
+                  <div class="label">SAYFA BULUNAMADI</div>
+                  <div class="code" aria-hidden="true">404</div>
+                  <h1>Bu adreste bir sayfa bulunamadı.</h1>
+                  <p>Adres değişmiş veya yanlış yazılmış olabilir.
+                     Adresi kontrol et ya da önceki sayfaya dön.</p>
+                  <div class="path">{path}</div>
+                  <button onclick="history.back()">← Önceki sayfaya dön</button>
+                </article>
+              </main>
+            </body>
+            </html>
+            """,
+    )
 
 
-from api.control import router as control_router
-app.include_router(control_router,prefix='/api/v1/control',tags=['Kesici komutları'])
-from api.auth import router as auth_router
-app.include_router(auth_router, prefix='/api/v1/auth', tags=['API oturumu'])
-
-from api.users import router as user_router
-from api.workspaces import router as workspace_router
-app.include_router(user_router,prefix='/api/v1/users',tags=['Kullanıcılar ve saha yetkileri'])
-app.include_router(workspace_router,prefix='/api/v1/workspace',tags=['Paylaşılan saha şemaları'])
+from api.gpio_inputs import router as gpio_input_router
+app.include_router(gpio_input_router,prefix="/api/v1/gpio-inputs",tags=["Dijital GPIO girişleri"])

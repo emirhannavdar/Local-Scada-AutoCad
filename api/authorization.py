@@ -61,6 +61,9 @@ def check_request(user,allowed,path,method,body,query):
   if site not in user['site_ids']:raise HTTPException(403,'Bu sahaya erişim yetkin yok.')
   if method not in ('GET','PUT') or method=='PUT' and user['role']!='operator':raise HTTPException(403,'İzleyici şemayı değiştiremez.')
   return
+ if route=='gpio-inputs':
+  if method=='GET' and path=='/api/v1/gpio-inputs/channels':return
+  raise HTTPException(403,'GPIO giriş yapılandırması root yetkisi gerektirir.')
  if route=='control':
   if path=='/api/v1/control/controls' and method=='GET':return
   if method=='POST' and path=='/api/v1/control/commands' and user['role']=='operator':

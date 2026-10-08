@@ -1175,6 +1175,8 @@ async def main():
 
     from collector.command_worker import command_loop
     command_task = asyncio.create_task(command_loop())
+    from collector.gpio_inputs import input_loop
+    input_task = asyncio.create_task(input_loop())
 
     print(
         "SCADA Collector başlatıldı"
@@ -1184,6 +1186,8 @@ async def main():
 
     while True:
 
+        if input_task.done() and input_task.exception():
+            raise input_task.exception()
         if command_task.done() and command_task.exception():
             raise command_task.exception()
 

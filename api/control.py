@@ -85,8 +85,13 @@ def save_control(body:Control):
   c.execute("SELECT 1 FROM scada_command q JOIN scada_control t ON t.id=q.control_id WHERE t.node_key=%s AND t.component=%s AND q.status IN('PENDING','EXECUTING')",(body.node_key,body.component))
   if c.fetchone():raise HTTPException(409,'Komut sürerken eşleştirme değiştirilemez.')
   if body.kind=='GPIO' and body.enabled:
+   c.execute('SELECT pg_advisory_xact_lock(891233)')
    c.execute("SELECT id FROM scada_control WHERE kind='GPIO' AND enabled AND gpio_worker=%s AND gpio_pin=%s AND NOT(node_key=%s AND component=%s)",(body.gpio_worker,body.gpio_pin,body.node_key,body.component))
    if c.fetchone():raise HTTPException(409,'Bu master üzerindeki GPIO başka bir kontrol için kullanılıyor.')
+  if body.kind=='GPIO' and body.enabled:
+   c.execute('SELECT pg_advisory_xact_lock(891233)')
+   c.execute('SELECT 1 FROM scada_gpio_input WHERE enabled AND worker=%s AND pin=%s',(body.gpio_worker,body.gpio_pin))
+   if c.fetchone():raise HTTPException(409,'Bu pin dijital girişe atanmış; röle çıkışı olarak kullanılamaz.')
   columns=','.join(v);assign=','.join(f'{k}=EXCLUDED.{k}' for k in v if k not in ('node_key','component'))
   c.execute(f'INSERT INTO scada_control ({columns}) VALUES ({",".join(["%s"]*len(v))}) ON CONFLICT(node_key,component) DO UPDATE SET {assign} RETURNING *',tuple(v.values()))
   saved=c.fetchone()
