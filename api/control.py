@@ -11,7 +11,7 @@ class Control(BaseModel):
  component:str=Field(default='main',pattern=r'^(main|L1|L2|L3)$')
  name:str=Field(min_length=1,max_length=100)
  device_id:int=Field(gt=0)
- kind:str=Field(default="MODBUS",pattern="^(MODBUS|GPIO)$")
+ kind:str=Field(default="MODBUS",pattern="^(MODBUS|GPIO|IEC104)$")
  gpio_pin:int|None=Field(default=None,ge=2,le=27)
  gpio_worker:str|None=Field(default=None,max_length=100)
  gpio_active_high:bool=True
@@ -25,9 +25,26 @@ class Control(BaseModel):
  feedback_open:int=Field(default=0,ge=0,le=65535)
  feedback_closed:int=Field(default=1,ge=0,le=65535)
  verify_seconds:int=Field(default=5,ge=1,le=30)
+ iec_ca:int|None=Field(default=None,ge=1,le=65534)
+ iec_command_ioa:int|None=Field(default=None,ge=0,le=16777215)
+ iec_command_type:int|None=None
+ iec_feedback_ioa:int|None=Field(default=None,ge=0,le=16777215)
+ iec_feedback_type:int|None=None
+ iec_command_mode:str|None=None
+ iec_cot:int|None=None
  enabled:bool=False
  @model_validator(mode='after')
  def check(self):
+  if self.kind=='IEC104':
+   if any(v is None for v in (self.iec_ca,self.iec_command_ioa,self.iec_command_type,self.iec_feedback_ioa,self.iec_feedback_type,self.iec_command_mode,self.iec_cot)):raise ValueError('IEC104 CA, komut/geri bildirim IOA ve Type ID, komut modu ve COT gerekli.')
+   if self.iec_command_type not in (45,46) or self.iec_feedback_type not in (1,3,30,31):raise ValueError('Komut Type ID 45/46; geri bildirim 1/3/30/31 olmalı.')
+   if self.iec_command_mode not in ('DIRECT','SELECT_AND_EXECUTE') or self.iec_cot!=6:raise ValueError('IEC104 komut modu ve ACTIVATION COT=6 gerekli.')
+   values={0,1} if self.iec_command_type==45 else {1,2}
+   fb={0,1} if self.iec_feedback_type in (1,30) else {1,2}
+   if {self.open_value,self.close_value}!=values or {self.feedback_open,self.feedback_closed}!=fb:raise ValueError('Tekli değerler 0/1, çiftli değerler 1/2 olmalı.')
+   if self.iec_command_ioa==self.iec_feedback_ioa:raise ValueError('Komut ve geri bildirim IOA ayrı olmalı.')
+   self.gpio_pin,self.gpio_worker=None,None
+   return self
   if self.kind=='GPIO':
    if self.gpio_pin is None or not self.gpio_worker or not self.gpio_worker.strip():raise ValueError('GPIO BCM pini ve master adı zorunlu.')
    self.gpio_worker=self.gpio_worker.strip()
@@ -55,6 +72,9 @@ class Result(BaseModel):
  status:str=Field(pattern='^(CONFIRMED|APPLIED|FAILED|UNKNOWN)$')
  feedback:int|None=None
  output_active:bool|None=None
+ feedback_ca:int|None=None
+ feedback_ioa:int|None=None
+ feedback_type_id:int|None=None
  physical_confirmed:bool=False
  detail:str=Field(default='',max_length=1000)
 def gate():
@@ -92,6 +112,14 @@ def save_control(body:Control):
    c.execute('SELECT pg_advisory_xact_lock(891233)')
    c.execute('SELECT 1 FROM scada_gpio_input WHERE enabled AND worker=%s AND pin=%s',(body.gpio_worker,body.gpio_pin))
    if c.fetchone():raise HTTPException(409,'Bu pin dijital girişe atanmış; röle çıkışı olarak kullanılamaz.')
+  if body.kind=='IEC104':
+   from api.iec104 import ready
+   ready(c);c.execute('SELECT config FROM scada_iec104_config WHERE device_id=%s',(body.device_id,));iec=c.fetchone()
+   if not iec or not iec['config']['enabled']:raise HTTPException(409,'Önce IEC104 bağlantısını etkinleştirin.')
+   matches=[p for p in iec['config']['points'] if p['ca']==body.iec_ca and p['ioa']==body.iec_feedback_ioa and p['type_id']==body.iec_feedback_type]
+   if not matches:raise HTTPException(422,'Geri bildirim nokta listesinde yok.')
+   c.execute('SELECT sinyal_adi FROM tag WHERE id=%s',(matches[0]['tag_id'],))
+   if c.fetchone()['sinyal_adi']!=body.feedback_signal:raise HTTPException(422,'Geri bildirim sinyali eşleşen tag sinyal_adi olmalı.')
   columns=','.join(v);assign=','.join(f'{k}=EXCLUDED.{k}' for k in v if k not in ('node_key','component'))
   c.execute(f'INSERT INTO scada_control ({columns}) VALUES ({",".join(["%s"]*len(v))}) ON CONFLICT(node_key,component) DO UPDATE SET {assign} RETURNING *',tuple(v.values()))
   saved=c.fetchone()
@@ -112,6 +140,9 @@ def command(body:Command,request:Request):
   c.execute("SELECT 1 FROM scada_command WHERE control_id=%s AND status IN('PENDING','EXECUTING')",(body.control_id,))
   if c.fetchone():raise HTTPException(409,'Bu kesicinin önceki komutu sonuçlanmalı.')
   if control['kind']=='MODBUS' and dev['protokol']!='MODBUS_TCP':raise HTTPException(409,'Bu sürümün komut adaptörü yalnızca MODBUS_TCP destekliyor.')
+  if control['kind']=='IEC104':
+   c.execute('SELECT config FROM scada_iec104_config WHERE device_id=%s',(control['device_id'],));iec=c.fetchone()
+   if not iec or not iec['config']['enabled']:raise HTTPException(409,'IEC104 bağlantısı etkin değil.')
   if control['kind']=='GPIO':
    c.execute("SELECT 1 FROM scada_gpio_state WHERE control_id=%s AND seen_at>now()-interval '20 seconds'",(control['id'],))
    if not c.fetchone():raise HTTPException(409,'GPIO master çevrimdışı. Collector’da GPIO ve komut yürütücüsünü etkinleştir; master adı ve pin izin listesini kontrol et.')
@@ -129,7 +160,7 @@ def claim(body:Claim):
  gate()
  with get_connection() as db,db.cursor(row_factory=dict_row) as c:
   sweep(c)
-  c.execute("SELECT q.* FROM scada_command q WHERE status='PENDING' AND (config->>'device_id')::bigint=ANY(%s) AND (COALESCE(config->>'kind','MODBUS')='MODBUS' OR config->>'gpio_worker'=%s) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1",(body.device_ids,body.worker));q=c.fetchone()
+  c.execute("SELECT q.* FROM scada_command q WHERE status='PENDING' AND (config->>'device_id')::bigint=ANY(%s) AND (COALESCE(config->>'kind','MODBUS') IN ('MODBUS','IEC104') OR config->>'gpio_worker'=%s) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1",(body.device_ids,body.worker));q=c.fetchone()
   if not q:return ok(None)
   c.execute('SELECT pg_advisory_xact_lock(%s)',(q['config']['device_id'],))
   c.execute("SELECT 1 FROM scada_command WHERE status='EXECUTING' AND (config->>'device_id')::bigint=%s",(q['config']['device_id'],))
@@ -143,6 +174,9 @@ def report(request_id:UUID,body:Result):
   c.execute('SELECT * FROM scada_command WHERE id=%s FOR UPDATE',(request_id,));q=c.fetchone()
   if not q or q['worker']!=body.worker:raise HTTPException(409,'Komut bu yürütücüye ait değil.')
   if q['status']!='EXECUTING':return ok(q)
+  if q['config'].get('kind')=='IEC104' and body.status=='CONFIRMED':
+   cfg=q['config'];expected=cfg['feedback_open'] if q['desired']=='open' else cfg['feedback_closed']
+   if not body.physical_confirmed or body.feedback!=expected or (body.feedback_ca,body.feedback_ioa,body.feedback_type_id)!=(cfg['iec_ca'],cfg['iec_feedback_ioa'],cfg['iec_feedback_type']):raise HTTPException(422,'IEC104 sonucu doğru fiziksel geri bildirim kanıtı içermeli.')
   gpio=q['config'].get('kind')=='GPIO'
   if gpio and body.status=='CONFIRMED' or not gpio and body.status=='APPLIED':raise HTTPException(422,'Komut türü ve sonuç durumu uyumsuz.')
   if gpio and body.status=='APPLIED':

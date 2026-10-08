@@ -48,6 +48,13 @@ def check_request(user,allowed,path,method,body,query):
    raise HTTPException(403,'Collector hesabı bu işlemi yapamaz.')
   return
  route=path.removeprefix('/api/v1/').split('/')[0]
+ if route=='iec104':
+  if method=='GET' and '/events/' in path:return
+  raise HTTPException(403,'IEC104 yapılandırması root içindir.')
+ if route=='operations':
+  if method=='GET' and not path.startswith('/api/v1/operations/audit'):return
+  if method=='POST' and user['role']=='operator' and path.endswith('/ack'):return
+  raise HTTPException(403,'Bu operasyon root yetkisi gerektirir.')
  if route in ('users',) or path=='/api/v1/auth/collector-connection':raise HTTPException(403,'Bu işlem root yetkisi gerektirir.')
  if path=='/api/v1/auth/me':return
  if route=='workspace':
@@ -118,7 +125,7 @@ def filter_result(allowed,path,result,user=None):
   elif isinstance(data,dict) and not visible(data):raise HTTPException(404,'Kayıt bulunamadı.')
  if user and user['role'] in ('viewer','operator'):
   # Telemetry/topology are necessary for viewing; network/configuration secrets are not.
-  permitted={'device':{'id','ad','name','ust_dugum_tipi','ust_dugum_id','aktif','bakim_modu'},'tag':{'id','cihaz_id','device_id','register_id','sinyal_adi','tag_adi','birim','aktif'},'control':{'id','node_key','component','name','device_id','feedback_signal','feedback_open','feedback_closed','enabled','kind','gpio_output_active','gpio_online','gpio_seen_at'}}
+  permitted={'device':{'id','ad','name','ust_dugum_tipi','ust_dugum_id','aktif','bakim_modu','effective_protocol'},'tag':{'id','cihaz_id','device_id','register_id','sinyal_adi','tag_adi','birim','aktif'},'control':{'id','node_key','component','name','device_id','feedback_signal','feedback_open','feedback_closed','enabled','kind','gpio_output_active','gpio_online','gpio_seen_at'}}
   if route=='control' and '/commands/' in path and isinstance(result['data'],dict):
    result['data']={k:v for k,v in result['data'].items() if k in {'id','control_id','desired','status','result','created_at','started_at','finished_at'}}
    return result

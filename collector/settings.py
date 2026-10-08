@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 from urllib.parse import urlsplit
 
-KEYS = {"SCADA_API_URL", "SCADA_API_TOKEN", "SCADA_API_TIMEOUT", "SCADA_CONFIG_REFRESH", "SCADA_DEVICE_IDS", "SCADA_COMMAND_WORKER", "SCADA_WORKER_ID", "SCADA_MAX_GAP", "SCADA_AUTO_TAG", "SCADA_SUMMARY_SECONDS", "SCADA_ENABLE_GPIO", "SCADA_GPIO_PINS", "SCADA_ENABLE_GPIO_INPUTS", "SCADA_GPIO_INPUT_PINS"}
+KEYS = {"SCADA_IEC104_TLS_CONFIG", "SCADA_BUFFER_PATH", "SCADA_BUFFER_MAX_ROWS", "SCADA_CACHE_MAX_AGE", "SCADA_API_URL", "SCADA_API_TOKEN", "SCADA_API_TIMEOUT", "SCADA_CONFIG_REFRESH", "SCADA_DEVICE_IDS", "SCADA_COMMAND_WORKER", "SCADA_WORKER_ID", "SCADA_MAX_GAP", "SCADA_AUTO_TAG", "SCADA_SUMMARY_SECONDS", "SCADA_ENABLE_GPIO", "SCADA_GPIO_PINS", "SCADA_ENABLE_GPIO_INPUTS", "SCADA_GPIO_INPUT_PINS"}
 
 def load_settings(path=None):
     path = Path(path or os.getenv("SCADA_COLLECTOR_CONFIG") or Path(__file__).with_name("collector.json"))
@@ -53,5 +53,11 @@ def load_settings(path=None):
         overlap = sorted(outputs & inputs)
         if overlap:
             raise ValueError('GPIO giriş / çıkış çakışması: BCM ' + ', '.join(map(str, overlap)) + '. Ortam değişkenleri JSON ayarlarından önceliklidir.')
+    if 'SCADA_BUFFER_MAX_ROWS' in combined and (not combined['SCADA_BUFFER_MAX_ROWS'].isdigit() or not 1000 <= int(combined['SCADA_BUFFER_MAX_ROWS']) <= 10000000):
+        raise ValueError('SCADA_BUFFER_MAX_ROWS 1000–10000000 arasında olmalı.')
+    if 'SCADA_CACHE_MAX_AGE' in combined:
+        try:cache_age=float(combined['SCADA_CACHE_MAX_AGE'])
+        except ValueError:raise ValueError('SCADA_CACHE_MAX_AGE sayısal olmalı.') from None
+        if not math.isfinite(cache_age) or not 60<=cache_age<=604800:raise ValueError('SCADA_CACHE_MAX_AGE 60–604800 saniye olmalı.')
     for k,v in values.items():
         os.environ.setdefault(k, str(v))

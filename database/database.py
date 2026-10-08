@@ -10,13 +10,18 @@ from config import (
 )
 
 def get_connection():
-    return psycopg.connect(
+    connection = psycopg.connect(
         host=os.getenv("DB_HOST", DB_HOST),
         port=os.getenv("DB_PORT", DB_PORT),
         dbname=os.getenv("DB_NAME", DB_NAME),
         user=os.getenv("DB_USER", DB_USER),
         password=os.getenv("DB_PASSWORD", DB_PASSWORD)
     )
+    from api.request_actor import actor
+    connection.execute("SELECT set_config('scada.actor', %s, false)", (actor.get(),))
+    connection.commit()
+    return connection
+
 
 def save_measurement(device_id, data):
     connection = get_connection()

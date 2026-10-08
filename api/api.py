@@ -305,3 +305,9 @@ async def scadawatt_error_page(request: Request, call_next):
 
 from api.gpio_inputs import router as gpio_input_router
 app.include_router(gpio_input_router,prefix="/api/v1/gpio-inputs",tags=["Dijital GPIO girişleri"])
+
+from api.operations import router as operations_router
+app.include_router(operations_router, prefix="/api/v1/operations", tags=["Geçmiş, alarm ve işletme"])
+
+from api.iec104 import router as iec104_router
+app.include_router(iec104_router,prefix='/api/v1/iec104',tags=['IEC 104'])

@@ -34,6 +34,12 @@ wheels = [
 ]
 
 [[package]]
+name = "c104"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9a/fe/f51faf4c5876c29c2721ff471cd9b997d792862f2745160121ef99f9f813/c104-2.2.1.tar.gz", hash = "sha256:d1b427f94cd0eeef376020a250ea0e7deb97ac33df5ee4908c7b20452cc8bb23", size = 1955468, upload-time = "2025-04-11T15:33:32.431Z" }
+
+[[package]]
 name = "certifi"
 version = "2026.7.22"
 source = { registry = "https://pypi.org/simple" }
@@ -214,11 +220,18 @@ dependencies = [
     { name = "pymodbus" },
     { name = "requests" },
     { name = "spglib" },
+    { name = "tzdata" },
     { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.optional-dependencies]
+iec104 = [
+    { name = "c104" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "c104", marker = "extra == 'iec104'", specifier = "==2.2.1" },
     { name = "fastapi", specifier = ">=0.142.2" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
     { name = "psycopg2-binary", specifier = ">=2.9.13" },
@@ -226,8 +239,10 @@ requires-dist = [
     { name = "pymodbus", specifier = ">=3.15.0" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "spglib", specifier = ">=2.7.0" },
+    { name = "tzdata", specifier = ">=2025.1" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.54.0" },
 ]
+provides-extras = ["iec104"]
 
 [[package]]
 name = "numpy"

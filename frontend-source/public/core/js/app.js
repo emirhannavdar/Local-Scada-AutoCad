@@ -96,7 +96,7 @@ function renderDiagram(){
 }
 function renderDeviceRows(){
   const devices=siteDevices();$('device-summary').textContent=devices.length+' cihaz';
-  $('device-rows').innerHTML=devices.map(n=>{const d=n.row,s=states.get(n.key)||{status:'unknown'},samples=samplesFor(d.id),latest=samples.map(x=>x.timestamp).filter(x=>Number.isFinite(parseTimestamp(x))).sort((a,b)=>parseTimestamp(b)-parseTimestamp(a))[0];return `<tr class="${String(d.id)===String(selectedDevice)?'selected':''}"><td><button class="device-link" data-device="${esc(d.id)}">${esc(nameOf(d))}<small>${esc(TYPES[topology.nodes.get(n.parent)?.type]||parentTypeLabel(d))} · ${esc(topology.nodes.get(n.parent)?.name||'Üst düğüm yok')}</small></button></td><td class="mono">${esc(d.protokol)}<br><span class="muted">${esc(d.ip??'Seri hat #'+d.seri_hat_id)}${d.port?':'+d.port:''} · Unit ${esc(d.slave_id??'—')}</span></td><td>${stateChip(s.status)}</td><td class="mono" title="${esc(latest||'')}">${latest?shortTime(latest):'—'}<br><span class="muted">${latest?age(latest):'Henüz ölçüm yok'}</span></td></tr>`;}).join('')||'<tr><td colspan="4" class="empty-table">Bu sahada cihaz yok veya cihazların üst düğüm kayıtları okunamadı.</td></tr>';
+  $('device-rows').innerHTML=devices.map(n=>{const d=n.row,s=states.get(n.key)||{status:'unknown'},samples=samplesFor(d.id),latest=samples.map(x=>x.timestamp).filter(x=>Number.isFinite(parseTimestamp(x))).sort((a,b)=>parseTimestamp(b)-parseTimestamp(a))[0];return `<tr class="${String(d.id)===String(selectedDevice)?'selected':''}"><td><button class="device-link" data-device="${esc(d.id)}">${esc(nameOf(d))}<small>${esc(TYPES[topology.nodes.get(n.parent)?.type]||parentTypeLabel(d))} · ${esc(topology.nodes.get(n.parent)?.name||'Üst düğüm yok')}</small></button></td><td class="mono">${esc(d.effective_protocol||d.protokol)}<br><span class="muted">${esc(d.effective_ip??d.ip??'Seri hat #'+d.seri_hat_id)}${(d.effective_port??d.port)?':'+(d.effective_port??d.port):''} · Unit ${esc(d.slave_id??'—')}</span></td><td>${stateChip(s.status)}</td><td class="mono" title="${esc(latest||'')}">${latest?shortTime(latest):'—'}<br><span class="muted">${latest?age(latest):'Henüz ölçüm yok'}</span></td></tr>`;}).join('')||'<tr><td colspan="4" class="empty-table">Bu sahada cihaz yok veya cihazların üst düğüm kayıtları okunamadı.</td></tr>';
 }
 const parentTypeLabel=d=>String(d.ust_dugum_tipi||'Bağlantısız');
 function renderDetails(){
@@ -109,7 +109,7 @@ function renderDetails(){
   const state=states.get(node.key)||{status:'unknown'};
   const kv=(label,value)=>`<div class="detail-kv"><label>${esc(label)}</label><span>${esc(value??'—')}</span></div>`;
   let body=`<div class="detail-state">${stateChip(state.status)}<small>${state.derived?'Türetilmiş durum':'Cihaz ölçümü'}</small></div>${kv('Düğüm',`${node.type} #${node.id}`)}${kv('Üst bağlantı',topology.nodes.get(node.parent)?.name??'Saha kökü')}`;
-  if(node.type==='DEVICE')body+=kv('Protokol',node.row.protokol)+kv('Adres',`${node.row.ip??'Seri #'+node.row.seri_hat_id}${node.row.port?':'+node.row.port:''}`)+kv('Unit ID',node.row.slave_id)+kv('Profil',node.row.profil_id)+kv('Bakım modu',node.row.bakim_modu?'Açık':'Kapalı');
+  if(node.type==='DEVICE')body+=kv('Protokol',node.row.effective_protocol||node.row.protokol)+kv('Adres',`${node.row.ip??'Seri #'+node.row.seri_hat_id}${node.row.port?':'+node.row.port:''}`)+kv('Unit ID',node.row.slave_id)+kv('Profil',node.row.profil_id)+kv('Bakım modu',node.row.bakim_modu?'Açık':'Kapalı');
   else body+=kv('Bağlı cihaz',desc.length)+`<div class="detail-help">Bu düğümün durumu altındaki cihazların ölçümlerinden türetilir. Köşk/hücre için ayrı kesici ölçümü eşleştirilmediyse fiziksel kesici konumu bilinmez.</div>`;
   $('detail-body').innerHTML=body;
   const sampleList=d?measurementRows(d.id,measurements,config):[];$('open-mapping').disabled=!d||demo;
@@ -284,8 +284,8 @@ document.addEventListener('click',event=>{if(window.parent!==window&&event.targe
 window.addEventListener('message',async e=>{
  if(e.origin!==location.origin||e.source!==window.parent||e.data?.type!=='scadawatt.control')return;
  const {id,path,method='GET',body}=e.data;
- if(!/^(auth\/(?:me|collector-connection)|users(?:\/[0-9]+)?|workspace\/[0-9]+(?:\/(?:export|import))?|gpio-inputs\/channels|control\/controls|control\/commands(?:\/[0-9a-f-]{36})?|(?:dm|tm|trafo|adp|device)(?:\/[0-9]+)?)$/.test(path)||!['GET','POST','PATCH','PUT','DELETE'].includes(method))return;
- try{if(demo)throw Error('Gerçek komutlar örnek veri modunda kullanılamaz.');const result=await api.request(path,{method,body});if(method!=='GET'&&!/^(gpio-inputs|control|workspace|users)\//.test(path))await reloadSettings();window.parent.postMessage({type:'scadawatt.control-result',id,result},location.origin);}
+ if(!(/^(auth\/(?:me|collector-connection)|users(?:\/[0-9]+)?|workspace\/[0-9]+(?:\/(?:export|import))?|gpio-inputs\/channels|control\/controls|control\/commands(?:\/[0-9a-f-]{36})?|(?:dm|tm|trafo|adp|device)(?:\/[0-9]+)?)$/.test(path)||/^iec104\/(?:config(?:\/[0-9]+)?|events\/[0-9]+)$/.test(path)||/^operations\/(?:history|health|daily-report|audit|alarm-rules(?:\/[0-9]+)?|alarms(?:\/[0-9]+\/ack)?)(?:\?[^#]*)?$/.test(path))||!['GET','POST','PATCH','PUT','DELETE'].includes(method))return;
+ try{if(demo)throw Error('Gerçek komutlar örnek veri modunda kullanılamaz.');const result=await api.request(path,{method,body});if(method!=='GET'&&!/^(iec104|operations|gpio-inputs|control|workspace|users)\//.test(path))await reloadSettings();window.parent.postMessage({type:'scadawatt.control-result',id,result},location.origin);}
  catch(error){window.parent.postMessage({type:'scadawatt.control-result',id,error:error.message},location.origin);}
 });
 

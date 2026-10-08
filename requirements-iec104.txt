@@ -1,0 +1,2 @@
+# Collector and lab simulator only. API does not need native c104.
+c104==2.2.1

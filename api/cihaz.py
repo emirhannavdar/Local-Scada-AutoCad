@@ -138,6 +138,14 @@ def getDevice():
         columns = [desc[0] for desc in cursor.description]
         result = [dict(zip(columns, row)) for row in rows]
 
+        cursor.execute("SELECT to_regclass('scada_iec104_config')")
+        if cursor.fetchone()[0] is not None:
+            cursor.execute('SELECT device_id,config FROM scada_iec104_config')
+            overlays={did:cfg for did,cfg in cursor.fetchall() if cfg['enabled']}
+            for row in result:
+                cfg=overlays.get(row.get('id'))
+                row['effective_protocol']='IEC104' if cfg else row['protokol']
+                if cfg:row.update(effective_ip=cfg['host'],effective_port=cfg['port'])
         return result
 
     finally:

@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "format": "oxfmt",
     "check": "tsc --noEmit",
-    "test": "node --test tests-workspace.mjs tests-collector-config.mjs tests-electrical.mjs"
+    "test": "node --test tests-workspace.mjs tests-collector-config.mjs tests-electrical.mjs tests-operations.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

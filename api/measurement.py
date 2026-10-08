@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Generic, TypeVar, Literal
 
 from fastapi import APIRouter, HTTPException
@@ -40,13 +40,19 @@ class RestApiMeasurement(BaseModel, Generic[T]):
 
 class ScadaMeasurement(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
-    tag_id: int
+    tag_id: int = Field(gt=0)
+    protocol_meta: dict | None = None
+    sampled_at: datetime | None = None
     deger: float | None = None
     deger_text: str | None = None
     kalite: Literal["GOOD", "STALE", "BAD", "COMM_FAIL", "SUBSTITUTED", "NOT_CONFIGURED"] = "GOOD"
 
     @model_validator(mode="after")
     def require_good_value(self):
+        if self.sampled_at is not None:
+            now = datetime.now(timezone.utc)
+            if self.sampled_at.tzinfo is None or self.sampled_at > now + timedelta(minutes=5):
+                raise ValueError('sampled_at saat dilimi içermeli ve gelecek zaman olmamalı.')
         if self.kalite in ("GOOD", "SUBSTITUTED") and self.deger is None and self.deger_text is None:
             raise ValueError("GOOD/SUBSTITUTED olcum bir sayisal veya metin degeri icermeli")
         return self
@@ -144,157 +150,13 @@ def getLiveMeasurements(
         connection.close()
 
 def postMeasurement(raw: ScadaMeasurement):
-
-    connection = get_connection()
-
-    try:
-        cursor = connection.cursor()
-
-        cursor.execute(
-            """
-            INSERT INTO olcum_gecmis (
-                zaman,
-                tag_id,
-                deger,
-                deger_text,
-                kalite
-            )
-            VALUES (
-                NOW(),
-                %s,
-                %s,
-                %s,
-                %s
-            );
-            """,
-            (
-                raw.tag_id,
-                raw.deger,
-                raw.deger_text,
-                raw.kalite
-            )
-        )
-
-        cursor.execute(
-            """
-            INSERT INTO olcum_anlik (
-                tag_id,
-                zaman,
-                deger,
-                deger_text,
-                kalite,
-                updated_at
-            )
-            VALUES (
-                %s,
-                NOW(),
-                %s,
-                %s,
-                %s,
-                NOW()
-            )
-            ON CONFLICT (tag_id)
-            DO UPDATE SET
-                -- Quality-only failure updates must preserve the last sample
-                -- and its acquisition time. updated_at records the status update.
-                zaman = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.zaman ELSE EXCLUDED.zaman END,
-                deger = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.deger ELSE EXCLUDED.deger END,
-                deger_text = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.deger_text ELSE EXCLUDED.deger_text END,
-                kalite = EXCLUDED.kalite,
-                updated_at = NOW();
-            """,
-            (
-                raw.tag_id,
-                raw.deger,
-                raw.deger_text,
-                raw.kalite
-            )
-        )
-
-        connection.commit()
-
-        return {
-            "tag_id": raw.tag_id,
-            "deger": raw.deger,
-            "deger_text": raw.deger_text,
-            "kalite": raw.kalite
-        }
-
-    except Exception:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+    from api.telemetry_store import store
+    store([raw])
+    return raw.model_dump()
 
 def postMeasurementsBatch(rows: list[ScadaMeasurement]):
-    """Tek baglanti / tek transaction ile toplu yazim.
-
-    Collector eskiden her tag icin ayri HTTP + ayri DB baglantisi aciyordu
-    (~100 ms/tag). 50 tag'li bir cihaz bir okuma periyodunda yetisemiyor,
-    olcumler 'eski' gorunuyordu."""
-    if not rows:
-        return {"count": 0}
-
-    history = [(r.tag_id, r.deger, r.deger_text, r.kalite) for r in rows]
-
-    # Ayni batch icinde ayni tag birden fazla gelirse sonuncusu gecerli.
-    latest = {}
-    for r in rows:
-        latest[r.tag_id] = (r.tag_id, r.deger, r.deger_text, r.kalite)
-
-    connection = get_connection()
-
-    try:
-        cursor = connection.cursor()
-
-        cursor.executemany(
-            """
-            INSERT INTO olcum_gecmis (zaman, tag_id, deger, deger_text, kalite)
-            VALUES (NOW(), %s, %s, %s, %s);
-            """,
-            history
-        )
-
-        cursor.executemany(
-            """
-            INSERT INTO olcum_anlik (
-                tag_id, zaman, deger, deger_text, kalite, updated_at
-            )
-            VALUES (%s, NOW(), %s, %s, %s, NOW())
-            ON CONFLICT (tag_id)
-            DO UPDATE SET
-                zaman = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.zaman ELSE EXCLUDED.zaman END,
-                deger = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.deger ELSE EXCLUDED.deger END,
-                deger_text = CASE
-                    WHEN EXCLUDED.deger IS NULL AND EXCLUDED.deger_text IS NULL
-                    THEN olcum_anlik.deger_text ELSE EXCLUDED.deger_text END,
-                kalite = EXCLUDED.kalite,
-                updated_at = NOW();
-            """,
-            list(latest.values())
-        )
-
-        connection.commit()
-
-        return {"count": len(rows)}
-
-    except Exception:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+    from api.telemetry_store import store
+    return store(rows)
 
 @measurement.get("")
 def Measurements(
@@ -328,6 +190,8 @@ def create_measurement_batch(rows: list[ScadaMeasurement]):
 
         return RestApiMeasurement.ok(data)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -347,6 +211,8 @@ def create_measurement(raw: ScadaMeasurement):
 
         return RestApiMeasurement.ok(data)
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=500,

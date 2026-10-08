@@ -3,6 +3,7 @@ import json
 import math
 import os
 import time
+from datetime import datetime, timezone
 from collector.runtime_config import assigned_devices
 
 from collector.api_client import (
@@ -282,6 +283,7 @@ def make_row(tag, value=None, text=None, quality="GOOD"):
 
     return {
         "tag_id": tag["id"],
+        "sampled_at": datetime.now(timezone.utc).isoformat(),
         "deger": value,
         "deger_text": text,
         "kalite": quality
@@ -543,19 +545,11 @@ def read_block(
 
 
 def flush(rows):
-
     if not rows:
         return
-
-    try:
-        post_measurements(rows)
-
-    except Exception as e:
-        print(
-            f"API_ERROR | "
-            f"{len(rows)} olcum yazilamadi | "
-            f"{e}"
-        )
+    from collector.telemetry import submit
+    # SQLite errors/full disk are raised; unpersisted measurements are not acknowledged.
+    submit(rows)
 
 
 def comm_fail_rows(tag_index, registers, exclude=()):
@@ -770,6 +764,10 @@ async def read_group_loop(
         else:
 
             state = f"OK:{bad > 0}"
+
+        from collector.telemetry import group_cycle
+        group_cycle(device['id'], group['id'], good, bad, link_error is not None,
+                    asyncio.get_running_loop().time()-cycle_start)
 
         # Durum degistiginde veya periyodik olarak ozet yaz.
         now = time.monotonic()
@@ -1079,6 +1077,14 @@ async def get_configuration():
     )
 
     devices = assigned_devices(devices)
+    from collector.api_client import get_data
+    try:
+        iec_configs = await asyncio.to_thread(get_data, "iec104/config")
+    except Exception as error:
+        if getattr(getattr(error, "response", None), "status_code", None) not in (404,503):raise
+        iec_configs=[]
+    iec_ids={c["device_id"] for c in iec_configs if c["enabled"]}
+    devices=[d for d in devices if d["id"] not in iec_ids]
 
     groups = await asyncio.to_thread(
         get_read_groups
@@ -1182,10 +1188,20 @@ async def main():
         "SCADA Collector başlatıldı"
     )
 
+    from collector.telemetry import outbox, delivery_loop, health_loop, configuration
+    delivery_task = asyncio.create_task(delivery_loop())
+    health_task = asyncio.create_task(health_loop())
+    from collector.iec104 import supervisor as iec104_supervisor
+    iec104_task=asyncio.create_task(iec104_supervisor())
     running = {}
+    last_config_ok = time.monotonic()
+    cache_max_age = float(os.getenv('SCADA_CACHE_MAX_AGE', '86400'))
 
     while True:
 
+        for background_task in (delivery_task, health_task, iec104_task):
+            if background_task.done() and not background_task.cancelled():
+                raise background_task.exception() or RuntimeError('Collector arka plan görevi durdu.')
         if input_task.done() and input_task.exception():
             raise input_task.exception()
         if command_task.done() and command_task.exception():
@@ -1197,6 +1213,9 @@ async def main():
                 await get_configuration()
             )
 
+            await asyncio.to_thread(outbox().save_cache, configs)
+            last_config_ok = time.monotonic()
+            configuration(configs, stale=False)
             desired_keys = set(
                 configs.keys()
             )
@@ -1292,9 +1311,21 @@ async def main():
 
         except Exception as e:
 
-            print(
-                f"CONFIG_API_ERROR | {e}"
-            )
+            log_limited('config-api', f"CONFIG_API_ERROR | {type(e).__name__} | son doğrulanmış yapılandırma kullanılıyor", 30)
+            configuration(stale=True)
+            if not running:
+                cached = await asyncio.to_thread(outbox().load_cache, cache_max_age)
+                if cached:
+                    last_config_ok = time.monotonic()-outbox().cache_age()
+                    for key, config in cached.items():
+                        task = asyncio.create_task(read_group_loop(config['device'],config['group'],config['registers'],config['tags'],config['serial_lines']))
+                        running[key]={'task':task,'fingerprint':config['fingerprint']}
+                    print('CONFIG_CACHE | son doğrulanmış yapılandırma yüklendi')
+            elif time.monotonic()-last_config_ok > cache_max_age:
+                for record in running.values():await stop_task(record['task'])
+                running.clear()
+                configuration({},stale=True)
+                print('CONFIG_CACHE_EXPIRED | okuma durduruldu')
 
         await asyncio.sleep(
             CONFIG_REFRESH_SECONDS

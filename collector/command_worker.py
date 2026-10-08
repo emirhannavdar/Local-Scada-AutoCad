@@ -62,6 +62,9 @@ async def command_loop():
       dev=next((d for d in devices if d['id']==q['config']['device_id']),None)
       if q['config'].get('kind')=='GPIO':
        result=await gpio_execute(gpio,q,dev) if gpio else {'status':'FAILED','detail':gpio_error or 'GPIO bu master üzerinde etkin değil.'}
+      elif q['config'].get('kind')=='IEC104':
+       from collector.iec104 import execute as iec104_execute
+       result=await asyncio.to_thread(iec104_execute,q,dev)
       else:
        lines=await asyncio.to_thread(get_serial_lines) if dev and dev['protokol']=='MODBUS_RTU' else []
        result=await asyncio.to_thread(execute,q,dev,lines) if dev else {'status':'FAILED','detail':'Atanmış cihaz bulunamadı.'}

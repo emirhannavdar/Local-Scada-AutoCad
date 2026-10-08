@@ -30,7 +30,7 @@ def permitted(role, method, path):
     if role != 'collector':
         return False
     return method == 'GET' or method == 'POST' and (
-                path in ('/api/v1/control/claim', '/api/v1/control/gpio-state', '/api/v1/gpio-inputs/samples') or path.startswith(
+                path in ('/api/v1/operations/ingest', '/api/v1/operations/heartbeat', '/api/v1/control/claim', '/api/v1/control/gpio-state', '/api/v1/gpio-inputs/samples') or path.startswith(
             '/api/v1/control/commands/') and path.endswith('/result')) or method == 'POST' and path.rstrip('/') in (
         '/api/v1/measurement', '/api/v1/measurement/batch')
 
@@ -138,7 +138,12 @@ def install_access_guard(app):
             request.state.allowed = allowed
             request.state.scada_role = user['role']
 
-            response = await call_next(request)
+            from api.request_actor import actor
+            actor_token = actor.set(user['username'])
+            try:
+                response = await call_next(request)
+            finally:
+                actor.reset(actor_token)
 
             if allowed is not None and request.method == 'GET' and response.status_code < 400 and 'application/json' in response.headers.get(
                     'content-type', ''):
